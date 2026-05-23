@@ -59,8 +59,9 @@ FireballEvent.OnServerEvent:Connect(function(player)
         end
     end)
 
+    local LookVector = HumanoidRootPart.CFrame.LookVector
     while Fireball.Parent == game.Workspace do
-        Fireball.Position = Fireball.Position + (HumanoidRootPart.CFrame.LookVector*CombatConfig.FireballSpeed)
+        Fireball.Position = Fireball.Position + (LookVector*CombatConfig.FireballSpeed)
         task.wait(0.03)
     end
 end)
