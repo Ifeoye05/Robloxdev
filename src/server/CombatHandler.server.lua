@@ -43,7 +43,7 @@ FireballEvent.OnServerEvent:Connect(function(player)
     local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
     local Fireball = FireballTemplate:Clone()
     local HasHit = false
-    Fireball.Position = HumanoidRootPart.Position
+    Fireball.CFrame = HumanoidRootPart.CFrame
     Fireball.Parent = game.Workspace
 
     game:GetService("Debris"):AddItem(Fireball, CombatConfig.FireballLT)
