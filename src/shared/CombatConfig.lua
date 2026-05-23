@@ -1,5 +1,5 @@
 local CombatConfig = {
-    Damage = 50,
+    Damage = 5,
     Cooldown = 0.5
 }
 
