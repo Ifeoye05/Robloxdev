@@ -9,6 +9,7 @@ local blockingPlayers = {}
 -- Special moves variables --
 local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
 local FireballTemplate = ReplicatedStorage:WaitForChild("FireballTemplate")
+local FireballExplosionTemplate = ReplicatedStorage:WaitForChild("FireballExplosionTemplate")
 
 -- Combat script
 
@@ -55,6 +56,16 @@ FireballEvent.OnServerEvent:Connect(function(player)
             if HasHit == true then return end
             HasHit = true
             Hit.Humanoid:TakeDamage(CombatConfig.FireballDamage)
+            local FireballExplosion = FireballExplosionTemplate:Clone()
+            FireballExplosion.Parent = game.Workspace
+            FireballExplosion.Position = Fireball.Position
+            task.wait(0.1)
+            local Explosionparticles = FireballExplosion:WaitForChild("Attachment"):GetChildren()
+            for _, particles in ipairs(Explosionparticles) do
+                particles:Emit(20)
+                print("Emitted " .. particles.name)
+            end
+            game:GetService("Debris"):AddItem(FireballExplosion, 1)
             game:GetService("Debris"):AddItem(Fireball,0)
         end
     end)
