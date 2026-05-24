@@ -13,6 +13,7 @@ local isBlocking = false
 local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
 local canFireball = true
 
+-- Registering Input -- 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
