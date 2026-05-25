@@ -20,6 +20,10 @@ local Animationb = Instance.new("Animation")
 Animationb.AnimationId = CombatConfig.Animations.Blocking
 local blockingAnimation = Humanoid.Animator:LoadAnimation(Animationb)
 
+-- Blocking vfx --
+local BlockvfxTemplate = ReplicatedStorage:WaitForChild("BlockvfxTemplate")
+local blockVfx = nil
+
 -- Special Moves --
 local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
 local canFireball = true
@@ -36,8 +40,18 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
     if input.KeyCode == Enum.KeyCode.F then
         isBlocking = true
-        blockingAnimation:Play()
         BlockEvent:FireServer(true)
+        local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+        local block = BlockvfxTemplate:Clone()
+        block.CFrame = HumanoidRootPart.CFrame * CFrame.new(0,0,-2)
+        block.Parent = Character
+        local weld = Instance.new("WeldConstraint")
+        weld.Parent = block
+        weld.Part0 = block
+        weld.Part1 = HumanoidRootPart
+        blockVfx = block
+        blockVfx.Attachment.Shield:Emit(1)
+        blockingAnimation:Play()
     end
 
     if input.KeyCode == Enum.KeyCode.Q then
@@ -61,6 +75,9 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
         isBlocking = false
         blockingAnimation:Stop()
         BlockEvent:FireServer(false)
+        if blockVfx then
+            game:GetService("Debris"):AddItem(blockVfx, 0)
+        end
     end
 end) 
 

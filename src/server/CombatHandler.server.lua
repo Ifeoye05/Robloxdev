@@ -6,8 +6,6 @@ local CombatConfigModule = ReplicatedStorage:WaitForChild("Shared"):WaitForChild
 local CombatConfig = require(CombatConfigModule)
 local blockingPlayers = {}
 
--- Combat Vfx -- 
-local BlockvfxTemplate = ReplicatedStorage:WaitForChild("BlockvfxTemplate")
 
 -- Special moves variables --
 local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
@@ -39,19 +37,8 @@ end)
 
 BlockEvent.OnServerEvent:Connect(function(player, isBlocking)
     if isBlocking then
-        local Character = player.Character
-        local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-        local block = BlockvfxTemplate:Clone()
-        blockingPlayers[player] = block
-        block.CFrame = HumanoidRootPart.CFrame * CFrame.new(0,0,-2)
-        block.Parent = player.Character
-        local weld = Instance.new("WeldConstraint")
-        weld.Parent = block
-        weld.Part0 = block
-        weld.Part1 = HumanoidRootPart
-    
+        blockingPlayers[player] = true
     else 
-        game:GetService("Debris"):AddItem(blockingPlayers[player], 0)
         blockingPlayers[player] = nil
     end
 
