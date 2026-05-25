@@ -5,7 +5,12 @@ local CombatConfig = {
     FireballDamage = 30,
     FireballCD = 2,
     FireballLT = 5,
-    FireballSpeed = 2
+    FireballSpeed = 2,
+    Animations = {
+        Fireball = "rbxassetid://98110307361831",
+        Blocking = "rbxassetid://95271568723402"
+    }
 }
+
 
 return CombatConfig
