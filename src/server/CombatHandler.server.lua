@@ -6,6 +6,9 @@ local CombatConfigModule = ReplicatedStorage:WaitForChild("Shared"):WaitForChild
 local CombatConfig = require(CombatConfigModule)
 local blockingPlayers = {}
 
+-- Combat Vfx -- 
+local BlockvfxTemplate = ReplicatedStorage:WaitForChild("BlockvfxTemplate")
+
 -- Special moves variables --
 local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
 local FireballTemplate = ReplicatedStorage:WaitForChild("FireballTemplate")
@@ -26,14 +29,32 @@ PunchEvent.OnServerEvent:Connect(function(player)
 
         if (HumanoidRootPart.Position - otherHumanoidRootPart.Position).Magnitude <= 7 then
             local otherPlayer = game:GetService("Players"):GetPlayerFromCharacter(otherCharacter)
-            if blockingPlayers[otherPlayer] then continue end
+            if blockingPlayers[otherPlayer] then 
+                humanoid:TakeDamage(CombatConfig.Damage*CombatConfig.BlockReduction)
+            return end
             humanoid:TakeDamage(CombatConfig.Damage)
         end
     end
 end)
 
 BlockEvent.OnServerEvent:Connect(function(player, isBlocking)
-    blockingPlayers[player] = isBlocking
+    if isBlocking then
+        local Character = player.Character
+        local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+        local block = BlockvfxTemplate:Clone()
+        blockingPlayers[player] = block
+        block.CFrame = HumanoidRootPart.CFrame * CFrame.new(0,0,-2)
+        block.Parent = player.Character
+        local weld = Instance.new("WeldConstraint")
+        weld.Parent = block
+        weld.Part0 = block
+        weld.Part1 = HumanoidRootPart
+    
+    else 
+        game:GetService("Debris"):AddItem(blockingPlayers[player], 0)
+        blockingPlayers[player] = nil
+    end
+
 end)
 
 -- Special moves script --
@@ -63,7 +84,6 @@ FireballEvent.OnServerEvent:Connect(function(player)
             local Explosionparticles = FireballExplosion:WaitForChild("Attachment"):GetChildren()
             for _, particles in ipairs(Explosionparticles) do
                 particles:Emit(20)
-                print("Emitted " .. particles.name)
             end
             game:GetService("Debris"):AddItem(FireballExplosion, 1)
             game:GetService("Debris"):AddItem(Fireball,0)

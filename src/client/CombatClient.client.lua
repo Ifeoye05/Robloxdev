@@ -37,7 +37,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.F then
         isBlocking = true
         blockingAnimation:Play()
-        task.wait(0.1)
         BlockEvent:FireServer(true)
     end
 
