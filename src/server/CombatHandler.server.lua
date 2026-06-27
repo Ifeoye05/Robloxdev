@@ -1,3 +1,5 @@
+local module = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StateHandler"))
+
 -- Normal Combat event variables --
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PunchEvent = ReplicatedStorage:WaitForChild("PunchEvent")
@@ -27,9 +29,10 @@ PunchEvent.OnServerEvent:Connect(function(player)
 
         if (HumanoidRootPart.Position - otherHumanoidRootPart.Position).Magnitude <= 7 then
             local otherPlayer = game:GetService("Players"):GetPlayerFromCharacter(otherCharacter)
+            module.SetStun(otherPlayer,true, 0.5, 0)
             if blockingPlayers[otherPlayer] then 
                 humanoid:TakeDamage(CombatConfig.Damage*CombatConfig.BlockReduction)
-            return end
+            end
             humanoid:TakeDamage(CombatConfig.Damage)
         end
     end

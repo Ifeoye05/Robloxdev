@@ -1,7 +1,7 @@
 local module = {}
 
 -- stores active state keys for each player
--- example: states[player].Stunned = true
+-- example: states[player]["Stunned"] = true
 local states = {}
 
 -- stores stun expiration data for players currently stunned
@@ -15,6 +15,7 @@ function module.GetState(plr, stateKey)
     if states[plr] then
         return states[plr][stateKey]
     end
+    return false
 end
 
 -- set a generic state on a player, optionally clearing it after duration seconds
