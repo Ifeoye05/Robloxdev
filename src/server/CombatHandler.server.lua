@@ -6,7 +6,6 @@ local PunchEvent = ReplicatedStorage:WaitForChild("PunchEvent")
 local BlockEvent = ReplicatedStorage:WaitForChild("BlockEvent")
 local CombatConfigModule = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CombatConfig")
 local CombatConfig = require(CombatConfigModule)
-local blockingPlayers = {}
 
 
 -- Special moves variables --
@@ -29,22 +28,23 @@ PunchEvent.OnServerEvent:Connect(function(player)
 
         if (HumanoidRootPart.Position - otherHumanoidRootPart.Position).Magnitude <= 7 then
             local otherPlayer = game:GetService("Players"):GetPlayerFromCharacter(otherCharacter)
-            module.SetStun(otherPlayer,true, 0.5, 0)
-            if blockingPlayers[otherPlayer] then 
+            module.SetState(player, "Attacking", true, CombatConfig.PunchCD)
+            if module.GetState(otherPlayer, "Blocking") then 
                 humanoid:TakeDamage(CombatConfig.Damage*CombatConfig.BlockReduction)
+            else
+                humanoid:TakeDamage(CombatConfig.Damage)
+                module.SetStun(otherPlayer,true, CombatConfig.PunchStun, 0)
             end
-            humanoid:TakeDamage(CombatConfig.Damage)
         end
     end
 end)
 
 BlockEvent.OnServerEvent:Connect(function(player, isBlocking)
     if isBlocking then
-        blockingPlayers[player] = true
+        module.SetState(player, "Blocking", true)
     else 
-        blockingPlayers[player] = nil
+        module.RemoveStates(player, "Blocking")
     end
-
 end)
 
 -- Special moves script --
@@ -85,4 +85,5 @@ FireballEvent.OnServerEvent:Connect(function(player)
         Fireball.Position = Fireball.Position + (LookVector*CombatConfig.FireballSpeed)
         task.wait(0.03)
     end
+    module.SetState(player, "FireballCD", true, CombatConfig.FireballCD)
 end)
