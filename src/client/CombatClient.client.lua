@@ -1,5 +1,6 @@
 print("Script Loaded")
 
+local animmodule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("AnimationHandler"))
 local module = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StateHandler"))
 
 -- Regular Combat (M1s, blocking etc) --
@@ -16,9 +17,6 @@ local Player = game:GetService("Players").LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
-local Animationb = Instance.new("Animation")
-Animationb.AnimationId = CombatConfig.Animations.Blocking
-local blockingAnimation = Humanoid.Animator:LoadAnimation(Animationb)
 
 -- Blocking vfx --
 local BlockvfxTemplate = ReplicatedStorage:WaitForChild("BlockvfxTemplate")
@@ -50,16 +48,13 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         weld.Part1 = HumanoidRootPart
         blockVfx = block
         blockVfx.Attachment.Shield:Emit(1)
-        blockingAnimation:Play()
+        animmodule.LoadAnim(Character, "Block", "rbxassetid://70558608395022")
     end
 
     if input.KeyCode == Enum.KeyCode.Q then
         if module.GetState(Player, "Attacking") or module.GetState(Player, "FireballCD") or module.GetState(Player, "Blocking") or module.GetState(Player, "Stunned") then return end
-        local Animation = Instance.new("Animation")
-        Animation.AnimationId = CombatConfig.Animations.Fireball
-        local fireballAnimation = Humanoid.Animator:LoadAnimation(Animation)
         module.SetState(Player, "Attacking", true)
-        fireballAnimation:Play()
+        animmodule.LoadAnim(Character, "Fireball", "rbxassetid://98110307361831")
         task.wait(0.61)
         FireballEvent:FireServer()
         module.RemoveStates(Player, "Attacking")
@@ -72,7 +67,7 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.F then
         module.RemoveStates(Player, "Blocking")
-        blockingAnimation:Stop()
+        animmodule.StopAnim(Character, "Block", "rbxassetid://70558608395022")
         BlockEvent:FireServer(false)
         if blockVfx then
             game:GetService("Debris"):AddItem(blockVfx, 0)
