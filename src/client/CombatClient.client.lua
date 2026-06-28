@@ -48,13 +48,13 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         weld.Part1 = HumanoidRootPart
         blockVfx = block
         blockVfx.Attachment.Shield:Emit(1)
-        animmodule.LoadAnim(Character, "Block", "rbxassetid://70558608395022")
+        animmodule.LoadAnim(Character, "Block", CombatConfig.Animations.Blocking)
     end
 
     if input.KeyCode == Enum.KeyCode.Q then
         if module.GetState(Player, "Attacking") or module.GetState(Player, "FireballCD") or module.GetState(Player, "Blocking") or module.GetState(Player, "Stunned") then return end
         module.SetState(Player, "Attacking", true)
-        animmodule.LoadAnim(Character, "Fireball", "rbxassetid://98110307361831")
+        animmodule.LoadAnim(Character, "Fireball", CombatConfig.Animations.Fireball)
         task.wait(0.61)
         FireballEvent:FireServer()
         module.RemoveStates(Player, "Attacking")
@@ -67,7 +67,7 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.F then
         module.RemoveStates(Player, "Blocking")
-        animmodule.StopAnim(Character, "Block", "rbxassetid://70558608395022")
+        animmodule.StopAnim(Character, "Block", CombatConfig.Animations.Blocking)
         BlockEvent:FireServer(false)
         if blockVfx then
             game:GetService("Debris"):AddItem(blockVfx, 0)
