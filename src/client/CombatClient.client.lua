@@ -12,10 +12,19 @@ local CombatConfig = require(CombatConfigModule)
 
 local PunchEvent = ReplicatedStorage:WaitForChild("PunchEvent")
 local BlockEvent = ReplicatedStorage:WaitForChild("BlockEvent")
+local EquipEvent = ReplicatedStorage:WaitForChild("EquipEvent")
 
 local Player = game:GetService("Players").LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
+
+local slotKeys = {
+    [Enum.KeyCode.One] = 1,
+    [Enum.KeyCode.Two] = 2,
+    [Enum.KeyCode.Three] = 3,
+    [Enum.KeyCode.Four] = 4,
+    [Enum.KeyCode.Five] = 5,
+}
 
 
 -- Blocking vfx --
@@ -59,6 +68,11 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         FireballEvent:FireServer()
         module.RemoveStates(Player, "Attacking")
         module.SetState(Player, "FireballCD", true, CombatConfig.FireballCD)
+    end
+
+    local slot = slotKeys[input.KeyCode]
+    if slot then
+        EquipEvent:FireServer(slot)
     end
 end)
 
