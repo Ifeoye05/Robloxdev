@@ -3,7 +3,7 @@ local EquipEvent = game:GetService("ReplicatedStorage"):WaitForChild("EquipEvent
 local InventoryUpdate = game:GetService("ReplicatedStorage"):WaitForChild("InventoryUpdateEvent")
 local katana = game:GetService("ServerStorage"):WaitForChild("WoodenKatana")
 local equippedWeapons = {}
-local equippedSlot = 0
+local equippedSlot = {}
 
 
 EquipEvent.OnServerEvent:Connect(function(player, slot)
@@ -19,8 +19,8 @@ EquipEvent.OnServerEvent:Connect(function(player, slot)
         if equippedWeapons[player] == item then
             equippedWeapons[player].Parent = game.ServerStorage
             equippedWeapons[player] = nil
-            equippedSlot = nil
-            InventoryUpdate:FireClient(player, inventorydataTXT, equippedSlot)
+            equippedSlot[player] = nil
+            InventoryUpdate:FireClient(player, inventorydataTXT, equippedSlot[player])
             return
         end
         if equippedWeapons[player] then
@@ -28,13 +28,13 @@ EquipEvent.OnServerEvent:Connect(function(player, slot)
             equippedWeapons[player] = nil
             item.Parent = player.Character
             equippedWeapons[player] = item
-            equippedSlot = nil
+            equippedSlot[player] = nil
         else
             item.Parent = player.Character
             equippedWeapons[player] = item
-            equippedSlot = slot
+            equippedSlot[player] = slot
         end
-        InventoryUpdate:FireClient(player, inventorydataTXT,equippedSlot)
+        InventoryUpdate:FireClient(player, inventorydataTXT,equippedSlot[player])
     else return end
 end)
 
