@@ -13,14 +13,14 @@ InventoryUpdate.OnClientEvent:Connect(function(inventorytxt, equippedSlot)
         local item = inventorytxt[i]
         if not button then return end
         if item then
-            button.Text = item
+            button.Text = item .. " " .. i
             if equippedSlot == i then
                 button.BackgroundColor3 = Color3.fromRGB(194,194,194)
             else
                 button.BackgroundColor3 = Color3.fromRGB(255,255,255)
             end
         else
-            button.Text = "Empty"
+            button.Text = i
         end
         print(item)
     end
