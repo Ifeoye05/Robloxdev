@@ -17,7 +17,7 @@ InventoryUpdate.OnClientEvent:Connect(function(inventorytxt, equippedSlot)
             if equippedSlot == i then
                 button.BackgroundColor3 = Color3.fromRGB(194,194,194)
             else
-                button.BackgroundColor3 = Color3.fromRGB(255,255,255)
+                button.BackgroundColor3 = Color3.fromRGB(45, 147, 202)
             end
         else
             button.Text = i
