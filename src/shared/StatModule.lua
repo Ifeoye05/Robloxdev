@@ -35,6 +35,14 @@ function statModule.getStat(plr, field)
     end
 end
 
+function statModule.addStatpoints(plr, amount)
+    if stats[plr] then
+        if statpoints[plr] then
+            statpoints[plr] += amount
+        end
+    end
+end
+
 game.Players.PlayerRemoving:Connect(function(plr)
     stats[plr] = nil
     statpoints[plr] = nil
