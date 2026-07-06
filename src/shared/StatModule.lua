@@ -43,6 +43,18 @@ function statModule.addStatpoints(plr, amount)
     end
 end
 
+function statModule.getStatData(plr)
+    if stats[plr] then
+        local stattable = {
+            Strength = statModule.getStat(plr, "Strength"),
+            Defense = statModule.getStat(plr, "Defense"),
+            Special = statModule.getStat(plr, "Special"),
+            StatPoints = statModule.getStatpoints(plr)
+        }
+        return stattable
+    end
+end
+
 game.Players.PlayerRemoving:Connect(function(plr)
     stats[plr] = nil
     statpoints[plr] = nil
