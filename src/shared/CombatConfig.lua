@@ -1,7 +1,7 @@
 local CombatConfig = {
     Damage = 5,
     PunchCD = 0.2,
-    PunchStun = 0.3,
+    PunchStun = 0.1,
     BlockReduction = 0, -- Damage is multiplied by the block reduction so 0 means 1 -- 
     FireballDamage = 30,
     FireballCD = 2,
