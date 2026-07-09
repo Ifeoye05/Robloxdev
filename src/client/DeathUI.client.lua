@@ -1,3 +1,4 @@
+-- Displays the death screen and requests a respawn when the server reports the player has died.
 local deathEvent = game:GetService("ReplicatedStorage"):WaitForChild("DeathEvent")
 local respawnEvent = game:GetService("ReplicatedStorage"):WaitForChild("RespawnEvent")
 local plr = game:GetService("Players").LocalPlayer

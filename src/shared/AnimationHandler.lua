@@ -1,5 +1,4 @@
-print("Script Loaded")
-
+-- Shared animation helper for loading, tracking, and cleaning up character animations.
 local combatModule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("CombatConfig"))
 
 local Debris = game:GetService("Debris")

@@ -1,3 +1,4 @@
+-- Handles character spawning, stat-based health setup, and death/respawn events.
 local statModule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StatModule"))
 local deathEvent = game:GetService("ReplicatedStorage"):WaitForChild("DeathEvent")
 local respawnEvent = game:GetService("ReplicatedStorage"):WaitForChild("RespawnEvent")

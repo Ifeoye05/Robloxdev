@@ -1,5 +1,7 @@
+-- Stores each player's temporary inventory data and exposes helpers for adding, removing, and reading items.
 local playerInventories = {}
 local inventory = {}
+local equippedItems = {}
 
 function inventory.addItem(player, item, slot)
     if  not playerInventories[player] then
@@ -42,8 +44,17 @@ function inventory.GetInventory(player)
     end
 end
 
+function inventory.getEquipped(player)
+    return equippedItems[player]
+end
+
+function inventory.setEquipped(player, item)
+    equippedItems[player] = item
+end
+
 game.Players.PlayerRemoving:Connect(function(player)
     playerInventories[player] = nil
+    equippedItems[player] = nil
 end)
 
 return inventory

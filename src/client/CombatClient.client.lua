@@ -1,7 +1,8 @@
-print("Script Loaded")
-
+-- Handles the local player's combat inputs.
+-- This script translates mouse and keyboard actions into server requests for attacks, blocking, special moves, and equipment changes.
 local animmodule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("AnimationHandler"))
 local module = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StateHandler"))
+local ClientState = require(script.Parent:WaitForChild("ClientState"))
 
 -- Regular Combat (M1s, blocking etc) --
 local UserInputService = game:GetService("UserInputService")
@@ -13,6 +14,7 @@ local CombatConfig = require(CombatConfigModule)
 local PunchEvent = ReplicatedStorage:WaitForChild("PunchEvent")
 local BlockEvent = ReplicatedStorage:WaitForChild("BlockEvent")
 local EquipEvent = ReplicatedStorage:WaitForChild("EquipEvent")
+local statactionevent = ReplicatedStorage:WaitForChild("StatActionEvent")
 
 local Player = game:GetService("Players").LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -60,7 +62,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         animmodule.LoadAnim(Character, "Block", CombatConfig.Animations.Blocking)
     end
 
+    if input.KeyCode == Enum.KeyCode.M then
+        statactionevent:FireServer(nil, 10, "AddPoints")
+    end
+
     if input.KeyCode == Enum.KeyCode.Q then
+        if ClientState.getEquippedSlot() then return end
         if module.GetState(Player, "Attacking") or module.GetState(Player, "FireballCD") or module.GetState(Player, "Blocking") or module.GetState(Player, "Stunned") then return end
         module.SetState(Player, "Attacking", true)
         animmodule.LoadAnim(Character, "Fireball", CombatConfig.Animations.Fireball)

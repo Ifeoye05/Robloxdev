@@ -1,3 +1,4 @@
+-- Handles stat point allocation, resets, and stat UI updates for players.
 local statModule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StatModule"))
 local statactionEvent = game:GetService("ReplicatedStorage"):WaitForChild("StatActionEvent")
 local statupdateEvent = game:GetService("ReplicatedStorage"):WaitForChild("StatUpdateEvent")
@@ -26,7 +27,12 @@ end)
 
 game.Players.PlayerAdded:Connect(function(plr)
     plr.CharacterAdded:Wait()
-    statModule.addStatpoints(plr, 5)
+    statModule.loadStats(plr)
     local stattable = statModule.getStatData(plr)
     statupdateEvent:FireClient(plr, stattable)
+    
+    plr.CharacterAdded:Connect(function()
+        local stattable = statModule.getStatData(plr)
+        statupdateEvent:FireClient(plr, stattable)
+    end)
 end)
