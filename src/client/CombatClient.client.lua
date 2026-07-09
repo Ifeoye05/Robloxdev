@@ -13,6 +13,7 @@ local CombatConfig = require(CombatConfigModule)
 local PunchEvent = ReplicatedStorage:WaitForChild("PunchEvent")
 local BlockEvent = ReplicatedStorage:WaitForChild("BlockEvent")
 local EquipEvent = ReplicatedStorage:WaitForChild("EquipEvent")
+local statactionevent = ReplicatedStorage:WaitForChild("StatActionEvent")
 
 local Player = game:GetService("Players").LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -58,6 +59,10 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         blockVfx = block
         blockVfx.Attachment.Shield:Emit(1)
         animmodule.LoadAnim(Character, "Block", CombatConfig.Animations.Blocking)
+    end
+
+    if input.KeyCode == Enum.KeyCode.M then
+        statactionevent:FireServer(nil, 10, "AddPoints")
     end
 
     if input.KeyCode == Enum.KeyCode.Q then
