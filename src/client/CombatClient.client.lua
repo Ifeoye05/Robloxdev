@@ -40,6 +40,7 @@ local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if ClientState.getEquippedSlot() then return end
         if module.GetState(Player, "Attacking") or module.GetState(Player, "Blocking") or module.GetState(Player, "Stunned") then return end
         PunchEvent:FireServer()
         module.SetState(Player, "Attacking", true, 0.2)
