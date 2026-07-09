@@ -9,12 +9,11 @@ local BlockEvent = ReplicatedStorage:WaitForChild("BlockEvent")
 local CombatConfigModule = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CombatConfig")
 local CombatConfig = require(CombatConfigModule)
 local DamageModule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("DamageModule"))
+local SpecialMoveHandler = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SpecialMoveHandler"))
 
 
 -- Special moves variables --
 local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
-local FireballTemplate = ReplicatedStorage:WaitForChild("FireballTemplate")
-local FireballExplosionTemplate = ReplicatedStorage:WaitForChild("FireballExplosionTemplate")
 
 -- Combat script
 
@@ -83,48 +82,6 @@ end)
 FireballEvent.OnServerEvent:Connect(function(player)
     -- Respect the fireball cooldown before spawning another projectile.
     if module.GetState(player, "FireballCD") then return end
-
-    local Character = player.Character
-    local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
-    local Fireball = FireballTemplate:Clone()
-    local HasHit = false
-
-    -- Start the projectile at the player's current position and orientation.
-    Fireball.CFrame = HumanoidRootPart.CFrame
-    Fireball.Parent = game.Workspace
-
-    game:GetService("Debris"):AddItem(Fireball, CombatConfig.FireballLT)
-
-    -- Damage is applied once when the projectile first touches a valid target.
-    local hitObject = Fireball.Touched:Connect(function(character)
-        local Hit = character.Parent
-        if Hit:FindFirstChild("Humanoid") then
-            if Hit == Character then return end
-            if HasHit == true then return end
-            HasHit = true
-            local targetPlayer = game:GetService("Players"):GetPlayerFromCharacter(Hit)
-            if targetPlayer then
-                DamageModule.dealspecialDamageplayer(player, Hit)
-            else
-                DamageModule.dealspecialDamagenpc(player, Hit)
-            end
-            local FireballExplosion = FireballExplosionTemplate:Clone()
-            FireballExplosion.Parent = game.Workspace
-            FireballExplosion.Position = Fireball.Position
-            task.wait(0.1)
-            local Explosionparticles = FireballExplosion:WaitForChild("Attachment"):GetChildren()
-            for _, particles in ipairs(Explosionparticles) do
-                particles:Emit(20)
-            end
-            game:GetService("Debris"):AddItem(FireballExplosion, 1)
-            game:GetService("Debris"):AddItem(Fireball,0)
-        end
-    end)
-
-    local LookVector = HumanoidRootPart.CFrame.LookVector
-    while Fireball.Parent == game.Workspace do
-        Fireball.Position = Fireball.Position + (LookVector*CombatConfig.FireballSpeed)
-        task.wait(0.03)
-    end
+    SpecialMoveHandler.Fireball(player)
     module.SetState(player, "FireballCD", true, CombatConfig.FireballCD)
 end)

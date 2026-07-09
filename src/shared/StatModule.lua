@@ -81,7 +81,6 @@ function statModule.loadStats(plr)
     else
         warn("Failed to load stats: " .. data)
     end
-    print("Stats after load:", stats[plr])
 end
 
 function statModule.setStats(plr, strength, defense, special)

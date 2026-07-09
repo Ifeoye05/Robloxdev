@@ -43,6 +43,9 @@ function inventory.GetInventory(player)
     end
 end
 
+function GetEquippedWeapon(player)
+end
+
 game.Players.PlayerRemoving:Connect(function(player)
     playerInventories[player] = nil
 end)
