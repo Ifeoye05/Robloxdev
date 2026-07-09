@@ -1,3 +1,4 @@
+-- Refreshes the inventory UI whenever the server sends updated inventory data.
 local InventoryUpdate = game:GetService("ReplicatedStorage"):WaitForChild("InventoryUpdateEvent")
 local InventoryModule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("InventoryModule"))
 

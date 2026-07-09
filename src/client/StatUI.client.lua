@@ -1,3 +1,4 @@
+-- Syncs the stat UI with server data and sends button actions back to the server.
 local statupdateEvent = game:GetService("ReplicatedStorage"):WaitForChild("StatUpdateEvent")
 local statactionEvent = game:GetService("ReplicatedStorage"):WaitForChild("StatActionEvent")
 

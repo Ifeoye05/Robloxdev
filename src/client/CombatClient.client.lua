@@ -1,3 +1,5 @@
+-- Handles the local player's combat inputs.
+-- This script translates mouse and keyboard actions into server requests for attacks, blocking, special moves, and equipment changes.
 local animmodule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("AnimationHandler"))
 local module = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StateHandler"))
 

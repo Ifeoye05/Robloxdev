@@ -1,3 +1,4 @@
+-- Stores each player's temporary inventory data and exposes helpers for adding, removing, and reading items.
 local playerInventories = {}
 local inventory = {}
 

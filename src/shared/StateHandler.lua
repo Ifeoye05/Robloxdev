@@ -1,3 +1,4 @@
+-- Shared state tracker for temporary combat flags such as blocking, attacking, stunned, and cooldowns.
 local module = {}
 
 -- stores active state keys for each player
@@ -20,12 +21,14 @@ end
 
 -- set a generic state on a player, optionally clearing it after duration seconds
 function module.SetState(plr, stateKey, value, duration)
-    if not states[plr] then 
+    if not states[plr] then
         states[plr] = {}
     end
 
+    -- Store the state value directly on the player entry.
     states[plr][stateKey] = value
 
+    -- If a duration is supplied, clear the state automatically after the timer expires.
     if duration and type(duration) == "number" then
         delay(duration, function()
             if states[plr] then
@@ -113,6 +116,7 @@ end
 function module.RemoveStates(plr, stateKey)
     if not states[plr] then return end
 
+    -- Remove one specific state or clear the entire state table for the player.
     if stateKey then
         states[plr][stateKey] = nil
         if next(states[plr]) == nil then
