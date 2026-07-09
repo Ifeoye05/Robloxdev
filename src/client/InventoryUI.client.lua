@@ -1,6 +1,7 @@
 -- Refreshes the inventory UI whenever the server sends updated inventory data.
 local InventoryUpdate = game:GetService("ReplicatedStorage"):WaitForChild("InventoryUpdateEvent")
 local InventoryModule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("InventoryModule"))
+local ClientState = require(script.Parent:WaitForChild("ClientState"))
 
 local player = game:GetService("Players").LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
@@ -8,6 +9,7 @@ local inventoryGui = PlayerGui:WaitForChild("InventoryGui")
 local frame = inventoryGui:WaitForChild("InventoryBar")
 
 InventoryUpdate.OnClientEvent:Connect(function(inventorytxt, equippedSlot)
+    ClientState.setEquippedSlot(equippedSlot)
     for i = 1, 5 do
         local button = frame:FindFirstChild("Slot" .. i)
         local item = inventorytxt[i]

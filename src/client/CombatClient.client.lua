@@ -2,6 +2,7 @@
 -- This script translates mouse and keyboard actions into server requests for attacks, blocking, special moves, and equipment changes.
 local animmodule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("AnimationHandler"))
 local module = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StateHandler"))
+local ClientState = require(script.Parent:WaitForChild("ClientState"))
 
 -- Regular Combat (M1s, blocking etc) --
 local UserInputService = game:GetService("UserInputService")
@@ -66,6 +67,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 
     if input.KeyCode == Enum.KeyCode.Q then
+        if ClientState.getEquippedSlot() then return end
         if module.GetState(Player, "Attacking") or module.GetState(Player, "FireballCD") or module.GetState(Player, "Blocking") or module.GetState(Player, "Stunned") then return end
         module.SetState(Player, "Attacking", true)
         animmodule.LoadAnim(Character, "Fireball", CombatConfig.Animations.Fireball)
