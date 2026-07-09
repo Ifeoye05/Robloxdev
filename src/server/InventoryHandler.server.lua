@@ -22,6 +22,7 @@ EquipEvent.OnServerEvent:Connect(function(player, slot)
         if equippedWeapons[player] == item then
             equippedWeapons[player].Parent = game.ServerStorage
             equippedWeapons[player] = nil
+            InventoryModule.setEquipped(player, nil)
             equippedSlot[player] = nil
             InventoryUpdate:FireClient(player, inventorydataTXT, equippedSlot[player])
             return
@@ -33,6 +34,7 @@ EquipEvent.OnServerEvent:Connect(function(player, slot)
             equippedWeapons[player] = nil
             item.Parent = player.Character
             equippedWeapons[player] = item
+            inventoryModule.setEquipped(player, item)
             equippedSlot[player] = nil
         else
             item.Parent = player.Character

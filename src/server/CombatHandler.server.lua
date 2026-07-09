@@ -10,6 +10,7 @@ local CombatConfigModule = ReplicatedStorage:WaitForChild("Shared"):WaitForChild
 local CombatConfig = require(CombatConfigModule)
 local DamageModule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("DamageModule"))
 local SpecialMoveHandler = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SpecialMoveHandler"))
+local InventoryModule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("InventoryModule"))
 
 
 -- Special moves variables --
@@ -81,6 +82,7 @@ end)
 -- Fireball -- 
 FireballEvent.OnServerEvent:Connect(function(player)
     -- Respect the fireball cooldown before spawning another projectile.
+    if InventoryModule.getEquipped(player) then return end
     if module.GetState(player, "FireballCD") then return end
     SpecialMoveHandler.Fireball(player)
     module.SetState(player, "FireballCD", true, CombatConfig.FireballCD)
