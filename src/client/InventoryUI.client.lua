@@ -21,6 +21,5 @@ InventoryUpdate.OnClientEvent:Connect(function(inventorytxt, equippedSlot)
         else
             button.Text = i
         end
-        print(item)
     end
 end)

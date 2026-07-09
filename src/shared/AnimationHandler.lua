@@ -1,5 +1,3 @@
-print("Script Loaded")
-
 local combatModule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("CombatConfig"))
 
 local Debris = game:GetService("Debris")

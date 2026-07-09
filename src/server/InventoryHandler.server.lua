@@ -49,7 +49,6 @@ game.Players.PlayerAdded:Connect(function(player)
             inventorydataTXT[i] = inventoryData[i].Name
         end
     end
-    print(inventorydataTXT)
     InventoryUpdate:FireClient(player, inventorydataTXT)
 end)
 
