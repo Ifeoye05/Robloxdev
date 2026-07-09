@@ -27,7 +27,7 @@ end)
 
 game.Players.PlayerAdded:Connect(function(plr)
     plr.CharacterAdded:Wait()
-    statModule.addStatpoints(plr, 5)
+    statModule.loadStats(plr)
     local stattable = statModule.getStatData(plr)
     statupdateEvent:FireClient(plr, stattable)
     
