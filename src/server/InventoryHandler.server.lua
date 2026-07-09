@@ -52,3 +52,11 @@ game.Players.PlayerAdded:Connect(function(player)
     print(inventorydataTXT)
     InventoryUpdate:FireClient(player, inventorydataTXT)
 end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+    if equippedWeapons[player] then
+        equippedWeapons[player]:Destroy()
+    end
+    equippedWeapons[player] = nil
+    equippedSlot[player] = nil
+end)

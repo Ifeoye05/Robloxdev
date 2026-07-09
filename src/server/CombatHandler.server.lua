@@ -16,6 +16,7 @@ local FireballExplosionTemplate = ReplicatedStorage:WaitForChild("FireballExplos
 -- Combat script
 
 PunchEvent.OnServerEvent:Connect(function(player)
+    if module.GetState(player, "Attacking") then return end
     local Character = player.Character
     local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
     local Characters = game.Workspace:GetChildren()
@@ -51,6 +52,7 @@ end)
 
 -- Fireball -- 
 FireballEvent.OnServerEvent:Connect(function(player)
+    if module.GetState(player, "FireballCD") then return end
     local Character = player.Character
     local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
     local Fireball = FireballTemplate:Clone()

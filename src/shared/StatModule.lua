@@ -4,6 +4,10 @@ local stats = {}
 local statpoints = {}
 
 function statModule.addStat(plr, field, amount)
+    if not amount then return end
+    amount = math.floor(amount)
+    if amount <= 0 then return end
+
     if stats[plr][field] then
         if amount <= statpoints[plr] then
             stats[plr][field] += amount

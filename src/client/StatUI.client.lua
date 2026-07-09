@@ -15,6 +15,8 @@ local Defensebutton = Buttons:WaitForChild("Defense")
 local Specialbutton = Buttons:WaitForChild("Special")
 local Resetbutton = Buttons:WaitForChild("ResetButton")
 
+local InputBox = plr:WaitForChild("PlayerGui"):WaitForChild("StatGui"):WaitForChild("Mainframe"):WaitForChild("Secondaryframe"):WaitForChild("InputBox")
+
 statupdateEvent.OnClientEvent:Connect(function(statdata)
     Strength.Text = statdata.Strength
     Defense.Text = statdata.Defense
@@ -24,18 +26,15 @@ statupdateEvent.OnClientEvent:Connect(function(statdata)
 end)
 
 Strengthbutton.MouseButton1Click:Connect(function()
-    local increaseAmount = plr:WaitForChild("PlayerGui"):WaitForChild("StatGui"):WaitForChild("Mainframe"):WaitForChild("Secondaryframe"):WaitForChild("InputBox").Text
-    statactionEvent:FireServer("Strength", tonumber(increaseAmount), "Add")
+    statactionEvent:FireServer("Strength", tonumber(InputBox.Text), "Add")
 end)
 
 Defensebutton.MouseButton1Click:Connect(function()
-    local increaseAmount = plr:WaitForChild("PlayerGui"):WaitForChild("StatGui"):WaitForChild("Mainframe"):WaitForChild("Secondaryframe"):WaitForChild("InputBox").Text
-    statactionEvent:FireServer("Defense", tonumber(increaseAmount), "Add")
+    statactionEvent:FireServer("Defense", tonumber(InputBox.Text), "Add")
 end)
 
 Specialbutton.MouseButton1Click:Connect(function()
-    local increaseAmount = plr:WaitForChild("PlayerGui"):WaitForChild("StatGui"):WaitForChild("Mainframe"):WaitForChild("Secondaryframe"):WaitForChild("InputBox").Text
-    statactionEvent:FireServer("Special", tonumber(increaseAmount), "Add")
+    statactionEvent:FireServer("Special", tonumber(InputBox.Text), "Add")
 end)
 
 Resetbutton.MouseButton1Click:Connect(function()

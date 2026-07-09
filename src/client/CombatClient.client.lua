@@ -61,9 +61,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 
     if input.KeyCode == Enum.KeyCode.Q then
-    end
-
-    if input.KeyCode == Enum.KeyCode.Q then
         if module.GetState(Player, "Attacking") or module.GetState(Player, "FireballCD") or module.GetState(Player, "Blocking") or module.GetState(Player, "Stunned") then return end
         module.SetState(Player, "Attacking", true)
         animmodule.LoadAnim(Character, "Fireball", CombatConfig.Animations.Fireball)
