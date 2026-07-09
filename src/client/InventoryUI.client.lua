@@ -7,7 +7,6 @@ local inventoryGui = PlayerGui:WaitForChild("InventoryGui")
 local frame = inventoryGui:WaitForChild("InventoryBar")
 
 InventoryUpdate.OnClientEvent:Connect(function(inventorytxt, equippedSlot)
-    print("Inventory received:", inventorytxt)
     for i = 1, 5 do
         local button = frame:FindFirstChild("Slot" .. i)
         local item = inventorytxt[i]
