@@ -17,6 +17,9 @@ local HitboxHandler = require(ReplicatedStorage:WaitForChild("Shared"):WaitForCh
 local hitAnimIndex = 1
 local hitAnims = {CombatConfig.Animations.Hitanim1, CombatConfig.Animations.Hitanim2}
 
+local hitCounter = {}
+local comboTime = {}
+
 
 -- Special moves variables --
 local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
@@ -37,12 +40,11 @@ PunchEvent.OnServerEvent:Connect(function(player)
     params.FilterDescendantsInstances = {Character}
 
     -- Perform a short-range hitbox check in front of the player to detect a valid target.
-    local hitbox = HitboxHandler.blockcast(Character, Cframe, size, direction)
+    local hitbox = HitboxHandler.blockcast(Character, Cframe, direction, size)
 
     -- Create a brief visual effect for the punch so the hitbox is easier to understand during play.
     HitboxHandler.visualize(Character, "block", {size = size, cframe = Cframe * CFrame.new(0,0,-3)})
 
-    local hitbox = workspace:Blockcast(Cframe, size, direction, params)
     -- Apply damage only if the raycast hit an entity with a Humanoid.
     if hitbox then
         local humanoid = hitbox.Instance.Parent:FindFirstChild("Humanoid")
@@ -53,16 +55,25 @@ PunchEvent.OnServerEvent:Connect(function(player)
                 -- Player-vs-player damage uses blocking rules.
                 DamageModule.dealregularDamageplayer(player, character)
                 module.SetStun(targetPlayer, true, CombatConfig.PunchStun)
-                local animtoPlay = hitAnims[hitAnimIndex]
-                animmodule.LoadAnim(character, "Hit", animtoPlay)
-                hitAnimIndex = hitAnimIndex % 2 + 1
             else
                 -- NPC damage uses the simpler damage path.
                 DamageModule.dealregularDamagenpc(player, character)
                 module.SetStun(character, true, CombatConfig.PunchStun)
-                local animtoPlay = hitAnims[hitAnimIndex]
-                animmodule.LoadAnim(character, "Hit", animtoPlay)
-                hitAnimIndex = hitAnimIndex % 2 + 1
+            end
+            -- shared hit counter and animation logic
+            local animtoPlay = hitAnims[hitAnimIndex]
+            animmodule.LoadAnim(character, "Hit", animtoPlay)
+            hitAnimIndex = hitAnimIndex % 2 + 1
+
+            if (time() - (comboTime[player] or 0)) > 2 then
+                hitCounter[player] = 0
+            end
+            hitCounter[player] = (hitCounter[player] or 0) + 1
+            comboTime[player] = time()
+            if hitCounter[player] == 5 then
+                DamageModule.Knockback(player, character)
+                hitCounter[player] = 0
+                comboTime[player] = 0
             end
         end
     end

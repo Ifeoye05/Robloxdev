@@ -47,6 +47,27 @@ function DamageModule.dealspecialDamageplayer(plr, targetcharacter)
     end
 end
 
+function DamageModule.Knockback(plr, targetcharacter)
+    print("Knockback called with:", plr, targetcharacter)
+    if not plr.Character then return end
+    if not plr.Character.HumanoidRootPart then return end
+    if not targetcharacter.HumanoidRootPart then return end
+    
+    local attackingChar = plr.Character
+    local attackHR = attackingChar.HumanoidRootPart
+    local victimHR = targetcharacter.HumanoidRootPart
 
+    local attackPosition = attackHR.Position
+    local victimPosition = victimHR.Position
+
+    local direction = (victimPosition-attackPosition).Unit
+    direction = Vector3.new(direction.X, 0, direction.Z)
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = direction * 200
+    bv.MaxForce = Vector3.new(1e5, 0, 1e5) -- horizontal only, no vertical
+    bv.Parent = targetcharacter.HumanoidRootPart
+    game:GetService("Debris"):AddItem(bv, 0.15)
+end
 
 return DamageModule
