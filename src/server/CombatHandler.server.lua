@@ -11,6 +11,10 @@ local CombatConfig = require(CombatConfigModule)
 local DamageModule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("DamageModule"))
 local SpecialMoveHandler = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SpecialMoveHandler"))
 local InventoryModule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("InventoryModule"))
+local animmodule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("AnimationHandler"))
+
+local hitAnimIndex = 1
+local hitAnims = {CombatConfig.Animations.Hitanim1, CombatConfig.Animations.Hitanim2}
 
 
 -- Special moves variables --
@@ -62,10 +66,16 @@ PunchEvent.OnServerEvent:Connect(function(player)
                 -- Player-vs-player damage uses blocking rules.
                 DamageModule.dealregularDamageplayer(player, character)
                 module.SetStun(targetPlayer, true, CombatConfig.PunchStun)
+                local animtoPlay = hitAnims[hitAnimIndex]
+                animmodule.LoadAnim(character, "Hit", animtoPlay)
+                hitAnimIndex = hitAnimIndex % 2 + 1
             else
                 -- NPC damage uses the simpler damage path.
                 DamageModule.dealregularDamagenpc(player, character)
                 module.SetStun(character, true, CombatConfig.PunchStun)
+                local animtoPlay = hitAnims[hitAnimIndex]
+                animmodule.LoadAnim(character, "Hit", animtoPlay)
+                hitAnimIndex = hitAnimIndex % 2 + 1
             end
         end
     end

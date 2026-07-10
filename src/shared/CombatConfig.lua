@@ -12,7 +12,9 @@ local CombatConfig = {
     FireballSpeed = 2,
     Animations = {
         Fireball = "rbxassetid://98110307361831",
-        Blocking = "rbxassetid://70558608395022"
+        Blocking = "rbxassetid://70558608395022",
+        Hitanim1 = "rbxassetid://72140063983832",
+        Hitanim2 = "rbxassetid://139973042322592"
     }
 }
 
