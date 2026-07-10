@@ -12,6 +12,7 @@ local DamageModule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChi
 local SpecialMoveHandler = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SpecialMoveHandler"))
 local InventoryModule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("InventoryModule"))
 local animmodule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("AnimationHandler"))
+local HitboxHandler = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("HitboxHandler"))
 
 local hitAnimIndex = 1
 local hitAnims = {CombatConfig.Animations.Hitanim1, CombatConfig.Animations.Hitanim2}
@@ -36,25 +37,11 @@ PunchEvent.OnServerEvent:Connect(function(player)
     params.FilterDescendantsInstances = {Character}
 
     -- Perform a short-range hitbox check in front of the player to detect a valid target.
-    local hitbox = workspace:Blockcast(Cframe, size, direction, params)
+    local hitbox = HitboxHandler.blockcast(Character, Cframe, size, direction)
 
     -- Create a brief visual effect for the punch so the hitbox is easier to understand during play.
-    local function visualize()
-        local visualPart = Instance.new("Part")
-        visualPart.Size = Vector3.new(4,4,CombatConfig.PunchRange)
-        visualPart.CFrame = Cframe * CFrame.new(0,0,-3)
-        visualPart.Anchored = false
-        visualPart.CanCollide = false
-        visualPart.Transparency = 0.5
-        visualPart.Color = Color3.fromRGB(255, 0, 0)
-        visualPart.Parent = Character
-        local weld = Instance.new("WeldConstraint")
-        weld.Parent = visualPart
-        weld.Part0 = visualPart
-        weld.Part1 = Character.HumanoidRootPart
-        game:GetService("Debris"):AddItem(visualPart, 0.1)
-    end
-    visualize()
+    HitboxHandler.visualize(Character, "block", {size = size, cframe = Cframe * CFrame.new(0,0,-3)})
+
     local hitbox = workspace:Blockcast(Cframe, size, direction, params)
     -- Apply damage only if the raycast hit an entity with a Humanoid.
     if hitbox then
