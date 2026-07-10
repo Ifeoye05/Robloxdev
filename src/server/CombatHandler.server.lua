@@ -20,6 +20,7 @@ local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
 
 PunchEvent.OnServerEvent:Connect(function(player)
     -- Prevent spam attacks while the player is already in an attack state.
+    if InventoryModule.getEquipped(player) then return end
     if module.GetState(player, "Attacking") then return end
 
     local Character = player.Character
@@ -82,6 +83,7 @@ end)
 -- Fireball -- 
 FireballEvent.OnServerEvent:Connect(function(player)
     -- Respect the fireball cooldown before spawning another projectile.
+    if InventoryModule.getEquipped(player) then return end
     if module.GetState(player, "FireballCD") then return end
     SpecialMoveHandler.Fireball(player)
     module.SetState(player, "FireballCD", true, CombatConfig.FireballCD)
