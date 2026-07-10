@@ -3,21 +3,21 @@ local statModule = require(game:GetService("ReplicatedStorage"):WaitForChild("Sh
 local deathEvent = game:GetService("ReplicatedStorage"):WaitForChild("DeathEvent")
 local respawnEvent = game:GetService("ReplicatedStorage"):WaitForChild("RespawnEvent")
 
-respawnEvent.OnServerEvent:Connect(function(plr)
-    plr:LoadCharacter()
+respawnEvent.OnServerEvent:Connect(function(player)
+    player:LoadCharacter()
 end)
 
-game.Players.PlayerAdded:Connect(function(plr)
-    plr.CharacterAdded:Connect(function(char)
-        local stats = statModule.getStatData(plr)
-        local Humanoid = char.Humanoid
+game.Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        local stats = statModule.getStatData(player)
+        local Humanoid = character.Humanoid
         if stats then
             Humanoid.MaxHealth = (stats.Defense * 2) + 100
             Humanoid.Health = Humanoid.MaxHealth
         end
 
-        char.Humanoid.Died:Connect(function()
-            deathEvent:FireClient(plr)
+        character.Humanoid.Died:Connect(function()
+            deathEvent:FireClient(player)
         end)
     end)
 end)

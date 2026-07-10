@@ -9,7 +9,7 @@ function SpecialMove.Fireball(player)
     local Character = player.Character
     local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
     local Fireball = FireballTemplate:Clone()
-    local HasHit = false
+    local hasHit = false
 
     -- Start the projectile at the player's current position and orientation.
     Fireball.CFrame = HumanoidRootPart.CFrame
@@ -18,17 +18,17 @@ function SpecialMove.Fireball(player)
     game:GetService("Debris"):AddItem(Fireball, CombatConfig.FireballLT)
 
     -- Damage is applied once when the projectile first touches a valid target.
-    local hitObject = Fireball.Touched:Connect(function(character)
-        local Hit = character.Parent
-        if Hit:FindFirstChild("Humanoid") then
-            if Hit == Character then return end
-            if HasHit == true then return end
-            HasHit = true
-            local targetPlayer = game:GetService("Players"):GetPlayerFromCharacter(Hit)
+    local hitObject = Fireball.Touched:Connect(function(touchedPart)
+        local targetCharacter = touchedPart.Parent
+        if targetCharacter:FindFirstChild("Humanoid") then
+            if targetCharacter == Character then return end
+            if hasHit == true then return end
+            hasHit = true
+            local targetPlayer = game:GetService("Players"):GetPlayerFromCharacter(targetCharacter)
             if targetPlayer then
-                DamageModule.dealspecialDamageplayer(player, Hit)
+                DamageModule.dealspecialDamageplayer(player, targetCharacter)
             else
-                DamageModule.dealspecialDamagenpc(player, Hit)
+                DamageModule.dealspecialDamagenpc(player, targetCharacter)
             end
             local FireballExplosion = FireballExplosionTemplate:Clone()
             FireballExplosion.Parent = game.Workspace
