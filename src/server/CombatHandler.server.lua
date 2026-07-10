@@ -28,7 +28,7 @@ PunchEvent.OnServerEvent:Connect(function(player)
     if module.GetState(player, "Attacking") then return end
 
     local Character = player.Character
-    local Cframe = Character.HumanoidRootPart.CFrame
+    local Cframe = Character.HumanoidRootPart.CFrame * CFrame.new(0,0,2)
     local params = RaycastParams.new()
     local size = Vector3.new(4,4,4)
     local direction = Cframe.LookVector*CombatConfig.PunchRange
@@ -41,13 +41,13 @@ PunchEvent.OnServerEvent:Connect(function(player)
     -- Create a brief visual effect for the punch so the hitbox is easier to understand during play.
     local function visualize()
         local visualPart = Instance.new("Part")
-        visualPart.Size = size
-        visualPart.CFrame = Cframe * CFrame.new(0, 0, -(CombatConfig.PunchRange/2) - 2)
+        visualPart.Size = Vector3.new(4,4,CombatConfig.PunchRange)
+        visualPart.CFrame = Cframe * CFrame.new(0,0,-3)
         visualPart.Anchored = false
         visualPart.CanCollide = false
         visualPart.Transparency = 0.5
         visualPart.Color = Color3.fromRGB(255, 0, 0)
-            visualPart.Parent = Character
+        visualPart.Parent = Character
         local weld = Instance.new("WeldConstraint")
         weld.Parent = visualPart
         weld.Part0 = visualPart
@@ -55,7 +55,7 @@ PunchEvent.OnServerEvent:Connect(function(player)
         game:GetService("Debris"):AddItem(visualPart, 0.1)
     end
     visualize()
-
+    local hitbox = workspace:Blockcast(Cframe, size, direction, params)
     -- Apply damage only if the raycast hit an entity with a Humanoid.
     if hitbox then
         local humanoid = hitbox.Instance.Parent:FindFirstChild("Humanoid")
