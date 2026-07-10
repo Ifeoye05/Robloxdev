@@ -54,6 +54,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         local block = BlockvfxTemplate:Clone()
         block.CFrame = HumanoidRootPart.CFrame * CFrame.new(0,0,-2)
         block.Parent = Character
+        block.Anchored = false
         local weld = Instance.new("WeldConstraint")
         weld.Parent = block
         weld.Part0 = block
