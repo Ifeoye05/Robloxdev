@@ -61,9 +61,11 @@ PunchEvent.OnServerEvent:Connect(function(player)
             if targetPlayer then
                 -- Player-vs-player damage uses blocking rules.
                 DamageModule.dealregularDamageplayer(player, character)
+                module.SetStun(targetPlayer, true, CombatConfig.PunchStun)
             else
                 -- NPC damage uses the simpler damage path.
                 DamageModule.dealregularDamagenpc(player, character)
+                module.SetStun(character, true, CombatConfig.PunchStun)
             end
         end
     end

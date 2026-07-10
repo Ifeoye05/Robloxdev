@@ -1,140 +1,182 @@
 -- Shared state tracker for temporary combat flags such as blocking, attacking, stunned, and cooldowns.
+-- Works for both players and NPC characters: the first argument may be a Player instance or a
+-- character Model, and each function routes to the correct backing table automatically.
 local module = {}
 
 -- stores active state keys for each player
 -- example: states[player]["Stunned"] = true
 local states = {}
+-- stores active state keys for each NPC character model
+local characterStates = {}
+-- Visual stun representation
+local highlighters = {}
 
--- stores stun expiration data for players currently stunned
+-- stores stun expiration data for players/characters currently stunned
 local stunTimers = {}
 
-function module.ReturnState(plr)
-    return states[plr]
+local function isPlayer(obj)
+    return obj ~= nil and obj:IsA("Player")
 end
 
-function module.GetState(plr, stateKey)
-    if states[plr] then
-        return states[plr][stateKey]
+-- picks the backing table for a given object (player vs NPC character)
+local function getStore(obj)
+    if isPlayer(obj) then
+        return states
+    end
+    return characterStates
+end
+
+-- resolves the Humanoid to apply walkspeed/stun effects to
+local function getHumanoid(obj)
+    if isPlayer(obj) then
+        return obj.Character and obj.Character:FindFirstChild("Humanoid")
+    end
+    return obj and obj:FindFirstChild("Humanoid")
+end
+
+function module.ReturnState(obj)
+    return getStore(obj)[obj]
+end
+
+function module.GetState(obj, stateKey)
+    local store = getStore(obj)
+    if store[obj] then
+        return store[obj][stateKey]
     end
     return false
 end
 
--- set a generic state on a player, optionally clearing it after duration seconds
-function module.SetState(plr, stateKey, value, duration)
-    if not states[plr] then
-        states[plr] = {}
+-- set a generic state on a player or character, optionally clearing it after duration seconds
+function module.SetState(obj, stateKey, value, duration)
+    local store = getStore(obj)
+
+    if not store[obj] then
+        store[obj] = {}
     end
 
-    -- Store the state value directly on the player entry.
-    states[plr][stateKey] = value
+    -- Store the state value directly on the entry.
+    store[obj][stateKey] = value
 
     -- If a duration is supplied, clear the state automatically after the timer expires.
     if duration and type(duration) == "number" then
         delay(duration, function()
-            if states[plr] then
-                states[plr][stateKey] = nil
+            if store[obj] then
+                store[obj][stateKey] = nil
 
-                if next(states[plr]) == nil then
-                    states[plr] = nil
+                if next(store[obj]) == nil then
+                    store[obj] = nil
                 end
             end
         end)
     end
 end
 
-function module.SetStun(plr, value, duration, stunSpeed)
-    if not plr or not plr.Character or not plr.Character:FindFirstChild("Humanoid") then return end
+function module.SetStun(obj, value, duration, stunSpeed)
+    local humanoid = getHumanoid(obj)
+    if not humanoid then return end
 
-    local humanoid = plr.Character:FindFirstChild("Humanoid") 
+    local store = getStore(obj)
 
-    if not states[plr] then
-        states[plr] = {}
+    if not store[obj] then
+        store[obj] = {}
     end
 
     if value then
         -- apply stun state and store original speed so it can be restored later
-        states[plr]["Stunned"] = true
+        store[obj]["Stunned"] = true
+        highlighters[obj] = Instance.new("Highlight")
+        highlighters[obj].Parent = isPlayer(obj) and obj.Character or obj
+        highlighters[obj].FillColor = Color3.fromRGB(255,0,0)
 
-        if not states[plr].OriginalWalkSpeed then
-            states[plr].OriginalWalkSpeed = humanoid.WalkSpeed
+        if not store[obj].OriginalWalkSpeed then
+            store[obj].OriginalWalkSpeed = humanoid.WalkSpeed
         end
 
         humanoid.WalkSpeed = stunSpeed or 0
 
         local endTime = time() + duration
 
-        if stunTimers[plr] then
+        if stunTimers[obj] then
             -- extend an existing stun timer if one is active
-            stunTimers[plr].EndTime = math.max(stunTimers[plr].EndTime, endTime)
+            stunTimers[obj].EndTime = math.max(stunTimers[obj].EndTime, endTime)
         else
-            stunTimers[plr] = {EndTime = endTime}
+            stunTimers[obj] = {EndTime = endTime}
 
             coroutine.wrap(function()
-                while stunTimers[plr] and time() < stunTimers[plr].EndTime do
+                while stunTimers[obj] and time() < stunTimers[obj].EndTime do
                     task.wait(0.1)
                 end
 
-                if states[plr] then
-                    states[plr]["Stunned"] = nil
-
-                    if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-                        local currentHumanoid = plr.Character:FindFirstChild("Humanoid")
-                        currentHumanoid.WalkSpeed = states[plr].OriginalWalkSpeed or 16
+                if store[obj] then
+                    store[obj]["Stunned"] = nil
+                    if highlighters[obj] then
+                        highlighters[obj]:Destroy()
+                        highlighters[obj] = nil
                     end
 
-                    states[plr].OriginalWalkSpeed = nil
+                    local currentHumanoid = getHumanoid(obj)
+                    if currentHumanoid then
+                        currentHumanoid.WalkSpeed = store[obj].OriginalWalkSpeed or 16
+                    end
 
-                    if next(states[plr]) == nil then
-                        states[plr] = nil
+                    store[obj].OriginalWalkSpeed = nil
+
+                    if next(store[obj]) == nil then
+                        store[obj] = nil
                     end
                 end
 
-                stunTimers[plr] = nil
+                stunTimers[obj] = nil
             end)()
         end
     else
         -- remove stun state immediately and restore walk speed
-        states[plr]["Stunned"] = nil
-
-        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            local currentHumanoid = plr.Character:FindFirstChild("Humanoid")
-            currentHumanoid.WalkSpeed = states[plr].OriginalWalkSpeed or 16
+        store[obj]["Stunned"] = nil
+        if highlighters[obj] then
+            highlighters[obj]:Destroy()
+            highlighters[obj] = nil
         end
 
-        states[plr].OriginalWalkSpeed = nil
-        stunTimers[plr] = nil
+        local currentHumanoid = getHumanoid(obj)
+        if currentHumanoid then
+            currentHumanoid.WalkSpeed = store[obj].OriginalWalkSpeed or 16
+        end
 
-        if next(states[plr]) == nil then
-            states[plr] = nil
+        store[obj].OriginalWalkSpeed = nil
+        stunTimers[obj] = nil
+
+        if next(store[obj]) == nil then
+            store[obj] = nil
         end
     end
 end
 
+function module.RemoveStates(obj, stateKey)
+    local store = getStore(obj)
+    if not store[obj] then return end
 
-
-
-function module.RemoveStates(plr, stateKey)
-    if not states[plr] then return end
-
-    -- Remove one specific state or clear the entire state table for the player.
+    -- Remove one specific state or clear the entire state table for the object.
     if stateKey then
-        states[plr][stateKey] = nil
-        if next(states[plr]) == nil then
-            states[plr] = nil
+        store[obj][stateKey] = nil
+        if next(store[obj]) == nil then
+            store[obj] = nil
         end
     else
-        -- remove all states for the player
-        states[plr] = nil
+        -- remove all states for the object
+        store[obj] = nil
     end
 end
 
 function module.ClearAllStates()
-    -- remove every stored player state and stun timer
+    -- remove every stored player/character state and stun timer
     for plr in pairs(states) do
         states[plr] = nil
     end
-    for plr in pairs(stunTimers) do
-        stunTimers[plr] = nil
+    for char in pairs(characterStates) do
+        characterStates[char] = nil
+    end
+    for key in pairs(stunTimers) do
+        stunTimers[key] = nil
     end
 end
 
@@ -142,6 +184,7 @@ end
 game.Players.PlayerRemoving:Connect(function(plr)
     states[plr] = nil
     stunTimers[plr] = nil
+    highlighters[plr] = nil
 end)
 
 return module
