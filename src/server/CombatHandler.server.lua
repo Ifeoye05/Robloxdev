@@ -1,6 +1,6 @@
 -- Server-side combat handler.
 -- This script processes melee attacks, blocking state, and the fireball special move.
-local module = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StateHandler"))
+local StateHandler = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StateHandler"))
 
 -- Normal Combat event variables --
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -15,7 +15,7 @@ local animmodule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild
 local HitboxHandler = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("HitboxHandler"))
 
 local hitAnimIndex = 1
-local hitAnims = {CombatConfig.Animations.Hitanim1, CombatConfig.Animations.Hitanim2}
+local hitAnims = {CombatConfig.Animations.HitAnim1, CombatConfig.Animations.HitAnim2}
 
 local hitCounter = {}
 local comboTime = {}
@@ -29,40 +29,37 @@ local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
 PunchEvent.OnServerEvent:Connect(function(player)
     -- Prevent spam attacks while the player is already in an attack state.
     if InventoryModule.getEquipped(player) then return end
-    if module.GetState(player, "Attacking") then return end
+    if StateHandler.GetState(player, "Attacking") then return end
 
     local Character = player.Character
-    local Cframe = Character.HumanoidRootPart.CFrame * CFrame.new(0,0,2)
-    local params = RaycastParams.new()
+    local cframe = Character.HumanoidRootPart.CFrame * CFrame.new(0,0,2)
     local size = Vector3.new(4,4,4)
-    local direction = Cframe.LookVector*CombatConfig.PunchRange
-    params.FilterType = Enum.RaycastFilterType.Exclude
-    params.FilterDescendantsInstances = {Character}
+    local direction = cframe.LookVector*CombatConfig.PunchRange
 
     -- Perform a short-range hitbox check in front of the player to detect a valid target.
-    local hitbox = HitboxHandler.blockcast(Character, Cframe, direction, size)
+    local hitbox = HitboxHandler.blockcast(Character, cframe, direction, size)
 
     -- Create a brief visual effect for the punch so the hitbox is easier to understand during play.
-    HitboxHandler.visualize(Character, "block", {size = size, cframe = Cframe * CFrame.new(0,0,-3)})
+    HitboxHandler.visualize(Character, "block", {size = size, cframe = cframe * CFrame.new(0,0,-3)})
 
     -- Apply damage only if the raycast hit an entity with a Humanoid.
     if hitbox then
-        local humanoid = hitbox.Instance.Parent:FindFirstChild("Humanoid")
-        if humanoid then
+        local targetHumanoid = hitbox.Instance.Parent:FindFirstChild("Humanoid")
+        if targetHumanoid then
             local targetPlayer = game:GetService("Players"):GetPlayerFromCharacter(hitbox.Instance.Parent)
-            local character = humanoid.Parent
+            local targetCharacter = targetHumanoid.Parent
             if targetPlayer then
                 -- Player-vs-player damage uses blocking rules.
-                DamageModule.dealregularDamageplayer(player, character)
-                module.SetStun(targetPlayer, true, CombatConfig.PunchStun)
+                DamageModule.dealregularDamageplayer(player, targetCharacter)
+                StateHandler.SetStun(targetPlayer, true, CombatConfig.PunchStun)
             else
                 -- NPC damage uses the simpler damage path.
-                DamageModule.dealregularDamagenpc(player, character)
-                module.SetStun(character, true, CombatConfig.PunchStun)
+                DamageModule.dealregularDamagenpc(player, targetCharacter)
+                StateHandler.SetStun(targetCharacter, true, CombatConfig.PunchStun)
             end
             -- shared hit counter and animation logic
-            local animtoPlay = hitAnims[hitAnimIndex]
-            animmodule.LoadAnim(character, "Hit", animtoPlay)
+            local animToPlay = hitAnims[hitAnimIndex]
+            animmodule.LoadAnim(targetCharacter, "Hit", animToPlay)
             hitAnimIndex = hitAnimIndex % 2 + 1
 
             if (time() - (comboTime[player] or 0)) > 2 then
@@ -71,7 +68,7 @@ PunchEvent.OnServerEvent:Connect(function(player)
             hitCounter[player] = (hitCounter[player] or 0) + 1
             comboTime[player] = time()
             if hitCounter[player] == 5 then
-                DamageModule.Knockback(player, character)
+                DamageModule.Knockback(player, targetCharacter)
                 hitCounter[player] = 0
                 comboTime[player] = 0
             end
@@ -82,19 +79,24 @@ end)
 BlockEvent.OnServerEvent:Connect(function(player, isBlocking)
     -- Toggle the blocking state on the server so damage logic can honor it.
     if isBlocking then
-        module.SetState(player, "Blocking", true)
+        StateHandler.SetState(player, "Blocking", true)
     else
-        module.RemoveStates(player, "Blocking")
+        StateHandler.RemoveStates(player, "Blocking")
     end
 end)
 
 -- Special moves script --
 
--- Fireball -- 
+-- Fireball --
 FireballEvent.OnServerEvent:Connect(function(player)
     -- Respect the fireball cooldown before spawning another projectile.
     if InventoryModule.getEquipped(player) then return end
-    if module.GetState(player, "FireballCD") then return end
+    if StateHandler.GetState(player, "FireballCD") then return end
     SpecialMoveHandler.Fireball(player)
-    module.SetState(player, "FireballCD", true, CombatConfig.FireballCD)
+    StateHandler.SetState(player, "FireballCD", true, CombatConfig.FireballCD)
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+    hitCounter[player] = nil
+    comboTime[player] = nil
 end)

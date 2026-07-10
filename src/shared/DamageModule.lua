@@ -1,72 +1,71 @@
 -- Centralized damage helper for applying combat damage to NPCs and players.
 local DamageModule = {}
 local statModule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StatModule"))
-local stateModule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StateHandler"))
+local StateHandler = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("StateHandler"))
 local CombatConfig = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("CombatConfig"))
 
 
-function DamageModule.dealregularDamagenpc(plr, targetcharacter)
-    local plrStrength = statModule.getStat(plr, "Strength")
-    local targethumanoid = targetcharacter:FindFirstChild("Humanoid")
-    if not targethumanoid then return end
-    targethumanoid:TakeDamage(5+(plrStrength*2))
+function DamageModule.dealregularDamagenpc(player, targetCharacter)
+    local playerStrength = statModule.getStat(player, "Strength")
+    local targetHumanoid = targetCharacter:FindFirstChild("Humanoid")
+    if not targetHumanoid then return end
+    targetHumanoid:TakeDamage(5+(playerStrength*2))
 end
 
-function DamageModule.dealspecialDamagenpc(plr, targetcharacter)
-    local plrSpecial = statModule.getStat(plr, "Special")
-    local targethumanoid = targetcharacter:FindFirstChild("Humanoid")
-    if not targethumanoid then return end
-    targethumanoid:TakeDamage(10+(plrSpecial*5))
+function DamageModule.dealspecialDamagenpc(player, targetCharacter)
+    local playerSpecial = statModule.getStat(player, "Special")
+    local targetHumanoid = targetCharacter:FindFirstChild("Humanoid")
+    if not targetHumanoid then return end
+    targetHumanoid:TakeDamage(10+(playerSpecial*5))
 end
 
-function DamageModule.dealregularDamageplayer(plr, targetcharacter)
-    local plrStrength = statModule.getStat(plr, "Strength")
-    local targetplayer = game:GetService("Players"):GetPlayerFromCharacter(targetcharacter)
-    local isBlocking = stateModule.GetState(targetplayer, "Blocking")
-    local targethumanoid = targetcharacter:FindFirstChild("Humanoid")
+function DamageModule.dealregularDamageplayer(player, targetCharacter)
+    local playerStrength = statModule.getStat(player, "Strength")
+    local targetPlayer = game:GetService("Players"):GetPlayerFromCharacter(targetCharacter)
+    local isBlocking = StateHandler.GetState(targetPlayer, "Blocking")
+    local targetHumanoid = targetCharacter:FindFirstChild("Humanoid")
 
-    if not targethumanoid then return end
+    if not targetHumanoid then return end
     if isBlocking then
-        targethumanoid:TakeDamage((5+(plrStrength*2))*CombatConfig.BlockReductionregular)
+        targetHumanoid:TakeDamage((5+(playerStrength*2))*CombatConfig.BlockReductionRegular)
     else
-        targethumanoid:TakeDamage(5+(plrStrength*2))
+        targetHumanoid:TakeDamage(5+(playerStrength*2))
     end
 end
 
-function DamageModule.dealspecialDamageplayer(plr, targetcharacter)
-    local plrSpecial = statModule.getStat(plr, "Special")
-    local targetplayer = game:GetService("Players"):GetPlayerFromCharacter(targetcharacter)
-    local isBlocking = stateModule.GetState(targetplayer, "Blocking")
-    local targethumanoid = targetcharacter:FindFirstChild("Humanoid")
+function DamageModule.dealspecialDamageplayer(player, targetCharacter)
+    local playerSpecial = statModule.getStat(player, "Special")
+    local targetPlayer = game:GetService("Players"):GetPlayerFromCharacter(targetCharacter)
+    local isBlocking = StateHandler.GetState(targetPlayer, "Blocking")
+    local targetHumanoid = targetCharacter:FindFirstChild("Humanoid")
 
-    if not targethumanoid then return end
+    if not targetHumanoid then return end
     if isBlocking then
-        targethumanoid:TakeDamage((10+(plrSpecial*5))*CombatConfig.BlockReductionspecial)
+        targetHumanoid:TakeDamage((10+(playerSpecial*5))*CombatConfig.BlockReductionSpecial)
     else
-        targethumanoid:TakeDamage(10+(plrSpecial*5))
+        targetHumanoid:TakeDamage(10+(playerSpecial*5))
     end
 end
 
-function DamageModule.Knockback(plr, targetcharacter)
-    print("Knockback called with:", plr, targetcharacter)
-    if not plr.Character then return end
-    if not plr.Character.HumanoidRootPart then return end
-    if not targetcharacter.HumanoidRootPart then return end
-    
-    local attackingChar = plr.Character
-    local attackHR = attackingChar.HumanoidRootPart
-    local victimHR = targetcharacter.HumanoidRootPart
+function DamageModule.Knockback(player, targetCharacter)
+    print("Knockback called with:", player, targetCharacter)
+    if not player.Character then return end
 
-    local attackPosition = attackHR.Position
-    local victimPosition = victimHR.Position
+    local attackerCharacter = player.Character
+    local attackerHumanoidRootPart = attackerCharacter:FindFirstChild("HumanoidRootPart")
+    local targetHumanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+    if not attackerHumanoidRootPart or not targetHumanoidRootPart then return end
 
-    local direction = (victimPosition-attackPosition).Unit
+    local attackerPosition = attackerHumanoidRootPart.Position
+    local targetPosition = targetHumanoidRootPart.Position
+
+    local direction = (targetPosition-attackerPosition).Unit
     direction = Vector3.new(direction.X, 0, direction.Z)
 
     local bv = Instance.new("BodyVelocity")
     bv.Velocity = direction * 200
     bv.MaxForce = Vector3.new(1e5, 0, 1e5) -- horizontal only, no vertical
-    bv.Parent = targetcharacter.HumanoidRootPart
+    bv.Parent = targetHumanoidRootPart
     game:GetService("Debris"):AddItem(bv, 0.15)
 end
 

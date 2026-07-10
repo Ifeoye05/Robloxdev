@@ -1,11 +1,9 @@
 -- Shared animation helper for loading, tracking, and cleaning up character animations.
-local combatModule = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("CombatConfig"))
-
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 
-local module = {}
-module.Anims = {}
+local AnimationHandler = {}
+AnimationHandler.Anims = {}
 
 local function getAnimator(char)
     local humanoid = char:FindFirstChildOfClass("Humanoid")
@@ -17,10 +15,10 @@ local function getAnimator(char)
         animator.Name = "Animator"
         animator.Parent = humanoid
     end
-    return animator 
+    return animator
 end
 
-function module.LoadAnim(char, _type, animId)
+function AnimationHandler.LoadAnim(char, _type, animId)
     if not char or not _type or not animId then return end
 
     local animator = getAnimator(char)
@@ -30,16 +28,16 @@ function module.LoadAnim(char, _type, animId)
     animation.AnimationId = animId
     local track = animator:LoadAnimation(animation)
 
-    module.Anims[char] = module.Anims[char] or {}
-    module.Anims[char][_type] = module.Anims[char][_type] or {}
+    AnimationHandler.Anims[char] = AnimationHandler.Anims[char] or {}
+    AnimationHandler.Anims[char][_type] = AnimationHandler.Anims[char][_type] or {}
 
     local connections = {}
 
     table.insert(connections, track.Stopped:Connect(function()
-        module.RemoveAnim(char, _type, animId)
+        AnimationHandler.RemoveAnim(char, _type, animId)
     end))
 
-    module.Anims[char][_type][animId] = {
+    AnimationHandler.Anims[char][_type][animId] = {
         Track = track,
         Connections = connections,
 
@@ -49,21 +47,21 @@ function module.LoadAnim(char, _type, animId)
     Debris:AddItem(track, track.Length + 1)
 end
 
-function module.GetAnims(char, animType)
-    if not module.Anims[char] then return {} end
+function AnimationHandler.GetAnims(char, animType)
+    if not AnimationHandler.Anims[char] then return {} end
     if animType then
-        return module.Anims[char][animType] or {}
+        return AnimationHandler.Anims[char][animType] or {}
     end
-    return module.Anims[char]
+    return AnimationHandler.Anims[char]
 end
 
-function module.IsAnim(char, _type, animId)
-    local entry = module.Anims[char] and module.Anims[char][_type] and module.Anims[char][_type][animId]
+function AnimationHandler.IsAnim(char, _type, animId)
+    local entry = AnimationHandler.Anims[char] and AnimationHandler.Anims[char][_type] and AnimationHandler.Anims[char][_type][animId]
     return entry and entry.Track and entry.Track.IsPlaying or false
 end
 
-function module.RemoveAnim(char, _type, animId)
-    local animData = module.Anims[char] and module.Anims[char][_type] and module.Anims[char][_type][animId]
+function AnimationHandler.RemoveAnim(char, _type, animId)
+    local animData = AnimationHandler.Anims[char] and AnimationHandler.Anims[char][_type] and AnimationHandler.Anims[char][_type][animId]
     if animData then
         if animData.Track then
             animData.Track:Stop()
@@ -78,32 +76,32 @@ function module.RemoveAnim(char, _type, animId)
             end
         end
 
-        module.Anims[char][_type][animId] = nil
+        AnimationHandler.Anims[char][_type][animId] = nil
 
-        if next(module.Anims[char][_type]) == nil then
-            module.Anims[char][_type] = nil
+        if next(AnimationHandler.Anims[char][_type]) == nil then
+            AnimationHandler.Anims[char][_type] = nil
         end
-        if next(module.Anims[char]) == nil then
-            module.Anims[char] = nil
+        if next(AnimationHandler.Anims[char]) == nil then
+            AnimationHandler.Anims[char] = nil
         end
     end
 end
 
-function module.StopAnim(char, _type, animId)
-    if not module.Anims[char] then return end
+function AnimationHandler.StopAnim(char, _type, animId)
+    if not AnimationHandler.Anims[char] then return end
 
     if _type == "All" then
-        for typeKey, anims in pairs(module.Anims[char]) do
+        for typeKey, anims in pairs(AnimationHandler.Anims[char]) do
             for id in pairs(anims) do
-                module.RemoveAnim(char, typeKey, id)
+                AnimationHandler.RemoveAnim(char, typeKey, id)
             end
         end
     else
         if animId then
-            module.RemoveAnim(char, _type, animId)
+            AnimationHandler.RemoveAnim(char, _type, animId)
         else
-            for id in pairs(module.Anims[char][_type] or {}) do
-                module.RemoveAnim(char, _type, id)
+            for id in pairs(AnimationHandler.Anims[char][_type] or {}) do
+                AnimationHandler.RemoveAnim(char, _type, id)
             end
         end
     end
@@ -111,10 +109,10 @@ end
 
 Players.PlayerRemoving:Connect(function(player)
     local char = player.Character or player:FindFirstChild("Character")
-    if module.Anims[char] then
-        module.StopAnim(char, "All")
-        module.Anims[char] = nil
+    if AnimationHandler.Anims[char] then
+        AnimationHandler.StopAnim(char, "All")
+        AnimationHandler.Anims[char] = nil
     end
 end)
 
-return module
+return AnimationHandler

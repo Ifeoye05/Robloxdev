@@ -1,7 +1,7 @@
 -- Shared state tracker for temporary combat flags such as blocking, attacking, stunned, and cooldowns.
 -- Works for both players and NPC characters: the first argument may be a Player instance or a
 -- character Model, and each function routes to the correct backing table automatically.
-local module = {}
+local StateHandler = {}
 
 -- stores active state keys for each player
 -- example: states[player]["Stunned"] = true
@@ -34,11 +34,11 @@ local function getHumanoid(obj)
     return obj and obj:FindFirstChild("Humanoid")
 end
 
-function module.ReturnState(obj)
+function StateHandler.ReturnState(obj)
     return getStore(obj)[obj]
 end
 
-function module.GetState(obj, stateKey)
+function StateHandler.GetState(obj, stateKey)
     local store = getStore(obj)
     if store[obj] then
         return store[obj][stateKey]
@@ -47,7 +47,7 @@ function module.GetState(obj, stateKey)
 end
 
 -- set a generic state on a player or character, optionally clearing it after duration seconds
-function module.SetState(obj, stateKey, value, duration)
+function StateHandler.SetState(obj, stateKey, value, duration)
     local store = getStore(obj)
 
     if not store[obj] then
@@ -71,7 +71,7 @@ function module.SetState(obj, stateKey, value, duration)
     end
 end
 
-function module.SetStun(obj, value, duration, stunSpeed)
+function StateHandler.SetStun(obj, value, duration, stunSpeed)
     local humanoid = getHumanoid(obj)
     if not humanoid then return end
 
@@ -84,9 +84,11 @@ function module.SetStun(obj, value, duration, stunSpeed)
     if value then
         -- apply stun state and store original speed so it can be restored later
         store[obj]["Stunned"] = true
-        highlighters[obj] = Instance.new("Highlight")
-        highlighters[obj].Parent = isPlayer(obj) and obj.Character or obj
-        highlighters[obj].FillColor = Color3.fromRGB(255,0,0)
+        if not highlighters[obj] then
+            highlighters[obj] = Instance.new("Highlight")
+            highlighters[obj].Parent = isPlayer(obj) and obj.Character or obj
+            highlighters[obj].FillColor = Color3.fromRGB(255,0,0)
+        end
 
         if not store[obj].OriginalWalkSpeed then
             store[obj].OriginalWalkSpeed = humanoid.WalkSpeed
@@ -151,7 +153,7 @@ function module.SetStun(obj, value, duration, stunSpeed)
     end
 end
 
-function module.RemoveStates(obj, stateKey)
+function StateHandler.RemoveStates(obj, stateKey)
     local store = getStore(obj)
     if not store[obj] then return end
 
@@ -167,13 +169,13 @@ function module.RemoveStates(obj, stateKey)
     end
 end
 
-function module.ClearAllStates()
+function StateHandler.ClearAllStates()
     -- remove every stored player/character state and stun timer
-    for plr in pairs(states) do
-        states[plr] = nil
+    for player in pairs(states) do
+        states[player] = nil
     end
-    for char in pairs(characterStates) do
-        characterStates[char] = nil
+    for character in pairs(characterStates) do
+        characterStates[character] = nil
     end
     for key in pairs(stunTimers) do
         stunTimers[key] = nil
@@ -181,10 +183,10 @@ function module.ClearAllStates()
 end
 
 -- cleanup when players leave the game
-game.Players.PlayerRemoving:Connect(function(plr)
-    states[plr] = nil
-    stunTimers[plr] = nil
-    highlighters[plr] = nil
+game.Players.PlayerRemoving:Connect(function(player)
+    states[player] = nil
+    stunTimers[player] = nil
+    highlighters[player] = nil
 end)
 
-return module
+return StateHandler
