@@ -96,6 +96,35 @@ FireballEvent.OnServerEvent:Connect(function(player)
     StateHandler.SetState(player, "FireballCD", true, CombatConfig.FireballCD)
 end)
 
+-- dash--
+local DashEvent = ReplicatedStorage:WaitForChild("DashEvent")
+
+DashEvent.OnServerEvent:Connect(function(player)
+    if StateHandler.GetState(player, "Dashing") or StateHandler.GetState(player, "DashCD") then return end
+    if StateHandler.GetState(player, "Attacking") or StateHandler.GetState(player, "Blocking") or StateHandler.GetState(player, "Stunned") then return end
+
+    local character = player.Character
+    if not character then return end
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    local humanoid = character:FindFirstChild("Humanoid")
+    if not humanoidRootPart or not humanoid then return end
+
+    local moveDirection = humanoid.MoveDirection
+    if moveDirection.Magnitude == 0 then
+        moveDirection = humanoidRootPart.CFrame.LookVector
+    end
+
+    StateHandler.SetState(player, "Dashing", true, CombatConfig.DashDuration)
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = moveDirection * CombatConfig.DashSpeed
+    bv.MaxForce = Vector3.new(1e5, 0, 1e5)
+    bv.Parent = humanoidRootPart
+    game:GetService("Debris"):AddItem(bv, CombatConfig.DashDuration)
+
+    StateHandler.SetState(player, "DashCD", true, CombatConfig.DashCD)
+end)
+
 game.Players.PlayerRemoving:Connect(function(player)
     hitCounter[player] = nil
     comboTime[player] = nil
