@@ -29,6 +29,10 @@ local slotKeys = {
 }
 
 
+-- Punch combo animations --
+local punchAnims = {CombatConfig.Animations.Punch1, CombatConfig.Animations.Punch2, CombatConfig.Animations.Punch3}
+local punchAnimIndex = 1
+
 -- Blocking vfx --
 local BlockvfxTemplate = ReplicatedStorage:WaitForChild("BlockvfxTemplate")
 local blockVfx = nil
@@ -44,6 +48,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if StateHandler.GetState(player, "Attacking") or StateHandler.GetState(player, "Blocking") or StateHandler.GetState(player, "Stunned") then return end
         PunchEvent:FireServer()
         StateHandler.SetState(player, "Attacking", true, 0.2)
+        animmodule.LoadAnim(Character, "Punch", punchAnims[punchAnimIndex])
+        punchAnimIndex = punchAnimIndex % 3 + 1
     end
 
     if input.KeyCode == Enum.KeyCode.F then
