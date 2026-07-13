@@ -18,7 +18,7 @@ local function getAnimator(char)
     return animator
 end
 
-function AnimationHandler.LoadAnim(char, _type, animId)
+function AnimationHandler.LoadAnim(char, _type, animId, loop)
     if not char or not _type or not animId then return end
 
     local animator = getAnimator(char)
@@ -27,7 +27,10 @@ function AnimationHandler.LoadAnim(char, _type, animId)
     local animation = Instance.new("Animation")
     animation.AnimationId = animId
     local track = animator:LoadAnimation(animation)
-
+    track.Looped = loop or false 
+    if _type == "Idle" then
+        track.Priority = Enum.AnimationPriority.Idle
+    end
     AnimationHandler.Anims[char] = AnimationHandler.Anims[char] or {}
     AnimationHandler.Anims[char][_type] = AnimationHandler.Anims[char][_type] or {}
 
@@ -44,7 +47,9 @@ function AnimationHandler.LoadAnim(char, _type, animId)
     }
 
     track:Play()
-    Debris:AddItem(track, track.Length + 1)
+    if not loop then 
+        Debris:AddItem(track, track.Length +1)
+    end
 end
 
 function AnimationHandler.GetAnims(char, animType)

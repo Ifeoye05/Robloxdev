@@ -47,8 +47,29 @@ function DamageModule.dealspecialDamageplayer(player, targetCharacter)
     end
 end
 
+function DamageModule.dealKatanaDamagenpc(player, targetCharacter)
+    local playerStrength = statModule.getStat(player, "Strength")
+    local targetHumanoid = targetCharacter:FindFirstChild("Humanoid")
+    if not targetHumanoid then return end
+    targetHumanoid:TakeDamage(15+(playerStrength*3))
+end
+
+function DamageModule.dealKatanaDamageplayer(player, targetCharacter)
+    local playerStrength = statModule.getStat(player, "Strength")
+    local targetPlayer = game:GetService("Players"):GetPlayerFromCharacter(targetCharacter)
+    local isBlocking = StateHandler.GetState(targetPlayer, "Blocking")
+    local targetHumanoid = targetCharacter:FindFirstChild("Humanoid")
+
+    if not targetHumanoid then return end
+    if isBlocking then
+        targetHumanoid:TakeDamage((15+(playerStrength*3))*CombatConfig.BlockReductionRegular)
+    else
+        targetHumanoid:TakeDamage(15+(playerStrength*3))
+    end
+end
+
+
 function DamageModule.Knockback(player, targetCharacter)
-    print("Knockback called with:", player, targetCharacter)
     if not player.Character then return end
 
     local attackerCharacter = player.Character

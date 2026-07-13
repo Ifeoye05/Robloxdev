@@ -29,13 +29,16 @@ local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
 
 PunchEvent.OnServerEvent:Connect(function(player)
     -- Prevent spam attacks while the player is already in an attack state.
-    if InventoryModule.getEquipped(player) then return end
     if StateHandler.GetState(player, "Attacking") then return end
+    local isKatana = InventoryModule.getEquipped(player) ~= nil
 
     local Character = player.Character
-    local cframe = Character.HumanoidRootPart.CFrame * CFrame.new(0,0,2)
+    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    if not HumanoidRootPart then return end
+    local cframe = HumanoidRootPart.CFrame * CFrame.new(0,0,2)
     local size = Vector3.new(4,4,4)
-    local direction = cframe.LookVector*CombatConfig.PunchRange
+    local range = isKatana and CombatConfig.KatanaRange or CombatConfig.PunchRange
+    local direction = cframe.LookVector*range
 
     -- Perform a short-range hitbox check in front of the player to detect a valid target.
     local hitbox = HitboxHandler.blockcast(Character, cframe, direction, size)
@@ -51,11 +54,19 @@ PunchEvent.OnServerEvent:Connect(function(player)
             local targetCharacter = targetHumanoid.Parent
             if targetPlayer then
                 -- Player-vs-player damage uses blocking rules.
-                DamageModule.dealregularDamageplayer(player, targetCharacter)
+                if isKatana then
+                    DamageModule.dealKatanaDamageplayer(player, targetCharacter)
+                else
+                    DamageModule.dealregularDamageplayer(player, targetCharacter)
+                end
                 StateHandler.SetStun(targetPlayer, true, CombatConfig.PunchStun)
             else
                 -- NPC damage uses the simpler damage path.
-                DamageModule.dealregularDamagenpc(player, targetCharacter)
+                if isKatana then
+                    DamageModule.dealKatanaDamagenpc(player, targetCharacter)
+                else
+                    DamageModule.dealregularDamagenpc(player, targetCharacter)
+                end
                 StateHandler.SetStun(targetCharacter, true, CombatConfig.PunchStun)
             end
 
@@ -107,6 +118,35 @@ FireballEvent.OnServerEvent:Connect(function(player)
     if StateHandler.GetState(player, "FireballCD") then return end
     SpecialMoveHandler.Fireball(player)
     StateHandler.SetState(player, "FireballCD", true, CombatConfig.FireballCD)
+end)
+
+-- dash--
+local DashEvent = ReplicatedStorage:WaitForChild("DashEvent")
+
+DashEvent.OnServerEvent:Connect(function(player)
+    if StateHandler.GetState(player, "Dashing") or StateHandler.GetState(player, "DashCD") then return end
+    if StateHandler.GetState(player, "Attacking") or StateHandler.GetState(player, "Blocking") or StateHandler.GetState(player, "Stunned") then return end
+
+    local character = player.Character
+    if not character then return end
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    local humanoid = character:FindFirstChild("Humanoid")
+    if not humanoidRootPart or not humanoid then return end
+
+    local moveDirection = humanoid.MoveDirection
+    if moveDirection.Magnitude == 0 then
+        moveDirection = humanoidRootPart.CFrame.LookVector
+    end
+
+    StateHandler.SetState(player, "Dashing", true, CombatConfig.DashDuration)
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = moveDirection * CombatConfig.DashSpeed
+    bv.MaxForce = Vector3.new(1e5, 0, 1e5)
+    bv.Parent = humanoidRootPart
+    game:GetService("Debris"):AddItem(bv, CombatConfig.DashDuration)
+
+    StateHandler.SetState(player, "DashCD", true, CombatConfig.DashCD)
 end)
 
 game.Players.PlayerRemoving:Connect(function(player)
