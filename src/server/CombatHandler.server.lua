@@ -53,29 +53,17 @@ PunchEvent.OnServerEvent:Connect(function(player)
                 -- Player-vs-player damage uses blocking rules.
                 DamageModule.dealregularDamageplayer(player, targetCharacter)
                 StateHandler.SetStun(targetPlayer, true, CombatConfig.PunchStun)
-                local targetPlayerPosition = targetPlayer.Character.HumanoidRootPart.Position
-                local vfx = Hitvfx:Clone()
-                vfx.Position = targetPlayerPosition
-                vfx.Parent = targetPlayer.Character
-                local weld = Instance.new("WeldConstraint")
-                weld.Parent = vfx
-                weld.Part0 = vfx
-                weld.Part1 = targetPlayer.Character.HumanoidRootPart
-                game:GetService("Debris"):AddItem(vfx, 0.5)
             else
                 -- NPC damage uses the simpler damage path.
                 DamageModule.dealregularDamagenpc(player, targetCharacter)
                 StateHandler.SetStun(targetCharacter, true, CombatConfig.PunchStun)
-                local targetCharacterPosition = targetCharacter.HumanoidRootPart.Position
-                local vfx = Hitvfx:Clone()
-                vfx.Position = targetCharacterPosition
-                vfx.Parent = targetCharacter
-                local weld = Instance.new("WeldConstraint")
-                weld.Parent = vfx
-                weld.Part0 = vfx
-                weld.Part1 = targetCharacter.HumanoidRootPart
-                game:GetService("Debris"):AddItem(vfx, 0.5)
             end
+
+            local attachment = Hitvfx:FindFirstChildOfClass("Attachment"):Clone()
+            attachment.Position = Vector3.new(0, 0, 0) -- relative to parent
+            attachment.Parent = targetCharacter.hitbox.Instance
+            game:GetService("Debris"):AddItem(attachment, 0.5)
+
             -- shared hit counter and animation logic
             local animToPlay = hitAnims[hitAnimIndex]
             animmodule.LoadAnim(targetCharacter, "Hit", animToPlay)
