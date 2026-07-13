@@ -8,6 +8,7 @@ local FireballExplosionTemplate = ReplicatedStorage:WaitForChild("FireballExplos
 function SpecialMove.Fireball(player)
     local Character = player.Character
     local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+    if not HumanoidRootPart then return end
     local Fireball = FireballTemplate:Clone()
     local hasHit = false
 

@@ -28,13 +28,16 @@ local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
 
 PunchEvent.OnServerEvent:Connect(function(player)
     -- Prevent spam attacks while the player is already in an attack state.
-    if InventoryModule.getEquipped(player) then return end
     if StateHandler.GetState(player, "Attacking") then return end
+    local isKatana = InventoryModule.getEquipped(player) ~= nil
 
     local Character = player.Character
-    local cframe = Character.HumanoidRootPart.CFrame * CFrame.new(0,0,2)
+    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    if not HumanoidRootPart then return end
+    local cframe = HumanoidRootPart.CFrame * CFrame.new(0,0,2)
     local size = Vector3.new(4,4,4)
-    local direction = cframe.LookVector*CombatConfig.PunchRange
+    local range = isKatana and CombatConfig.KatanaRange or CombatConfig.PunchRange
+    local direction = cframe.LookVector*range
 
     -- Perform a short-range hitbox check in front of the player to detect a valid target.
     local hitbox = HitboxHandler.blockcast(Character, cframe, direction, size)
@@ -50,11 +53,19 @@ PunchEvent.OnServerEvent:Connect(function(player)
             local targetCharacter = targetHumanoid.Parent
             if targetPlayer then
                 -- Player-vs-player damage uses blocking rules.
-                DamageModule.dealregularDamageplayer(player, targetCharacter)
+                if isKatana then
+                    DamageModule.dealKatanaDamageplayer(player, targetCharacter)
+                else
+                    DamageModule.dealregularDamageplayer(player, targetCharacter)
+                end
                 StateHandler.SetStun(targetPlayer, true, CombatConfig.PunchStun)
             else
                 -- NPC damage uses the simpler damage path.
-                DamageModule.dealregularDamagenpc(player, targetCharacter)
+                if isKatana then
+                    DamageModule.dealKatanaDamagenpc(player, targetCharacter)
+                else
+                    DamageModule.dealregularDamagenpc(player, targetCharacter)
+                end
                 StateHandler.SetStun(targetCharacter, true, CombatConfig.PunchStun)
             end
             -- shared hit counter and animation logic

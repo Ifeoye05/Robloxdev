@@ -7,14 +7,26 @@ local statupdateEvent = game:GetService("ReplicatedStorage"):WaitForChild("StatU
 game.Players.CharacterAutoLoads = false
 
 statactionEvent.OnServerEvent:Connect(function(player, field, amount, action)
-    if action == "Add" then
+       if action == "Add" then
         if field then
             if amount then
                 statModule.addStat(player, field, amount)
                 local stattable = statModule.getStatData(player)
                 statupdateEvent:FireClient(player, stattable)
+
+                if field == "Defense" then
+                    local character = player.Character
+                    local humanoid = character and character:FindFirstChild("Humanoid")
+                    if humanoid then
+                        local oldMaxHealth = humanoid.MaxHealth
+                        local newMaxHealth = (stattable.Defense * 2) + 100
+                        humanoid.MaxHealth = newMaxHealth
+                        humanoid.Health = math.min(humanoid.Health + (newMaxHealth - oldMaxHealth), newMaxHealth)
+                    end
+                end
             end
         end
+
     elseif action == "Reset" then
         statModule.resetStats(player)
         local stattable = statModule.getStatData(player)
