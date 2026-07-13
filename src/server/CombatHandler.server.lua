@@ -61,7 +61,13 @@ PunchEvent.OnServerEvent:Connect(function(player)
 
             local attachment = Hitvfx:FindFirstChildOfClass("Attachment"):Clone()
             attachment.Position = Vector3.new(0, 0, 0) -- relative to parent
-            attachment.Parent = targetCharacter.hitbox.Instance
+            attachment.Parent = hitbox.Instance
+            for _, emitter in pairs(attachment:GetChildren()) do
+                if emitter:IsA("ParticleEmitter") then
+                    local amount = emitter:GetAttribute("BurstAmount") or 20
+                    emitter:Emit(amount)
+                end
+            end
             game:GetService("Debris"):AddItem(attachment, 0.5)
 
             -- shared hit counter and animation logic
