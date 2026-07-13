@@ -33,6 +33,10 @@ local slotKeys = {
 local punchAnims = {CombatConfig.Animations.Punch1, CombatConfig.Animations.Punch2, CombatConfig.Animations.Punch3}
 local punchAnimIndex = 1
 
+--Katana combo animations --
+local katanaAnims = {CombatConfig.Animations.katana1, CombatConfig.Animations.katana2, CombatConfig.Animations.katana3}
+local katanaAnimIndex = 1
+
 -- Blocking vfx --
 local BlockvfxTemplate = ReplicatedStorage:WaitForChild("BlockvfxTemplate")
 local blockVfx = nil
@@ -40,19 +44,26 @@ local blockVfx = nil
 -- Special Moves --
 local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
 
+-- dash move --
+local DashEvent = ReplicatedStorage:WaitForChild("DashEvent")
+
 -- Registering Input --
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        if ClientState.getEquippedSlot() then return end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
         if StateHandler.GetState(player, "Attacking") or StateHandler.GetState(player, "Blocking") or StateHandler.GetState(player, "Stunned") then return end
         PunchEvent:FireServer()
         StateHandler.SetState(player, "Attacking", true, 0.2)
-        animmodule.LoadAnim(Character, "Punch", punchAnims[punchAnimIndex])
-        punchAnimIndex = punchAnimIndex % 3 + 1
+        if ClientState.getEquippedItem() then
+            animmodule.LoadAnim(Character, "Punch", katanaAnims[katanaAnimIndex])
+            katanaAnimIndex = katanaAnimIndex % 3 + 1
+        else
+            animmodule.LoadAnim(Character, "Punch", punchAnims[punchAnimIndex])
+            punchAnimIndex = punchAnimIndex % 3 + 1
+        end
     end
 
-    if input.KeyCode == Enum.KeyCode.F then
+      if input.KeyCode == Enum.KeyCode.F then
         if StateHandler.GetState(player, "Stunned") or StateHandler.GetState(player, "Attacking") then return end
         BlockEvent:FireServer(true)
         StateHandler.SetState(player, "Blocking", true)
@@ -70,6 +81,24 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         animmodule.LoadAnim(Character, "Block", CombatConfig.Animations.Blocking)
     end
 
+    if input.KeyCode == Enum.KeyCode.LeftControl then
+        if StateHandler.GetState(player, "Attacking") or StateHandler.GetState(player, "Blocking") or StateHandler.GetState(player, "Stunned") or StateHandler.GetState(player, "Dashing") or StateHandler.GetState(player, "DashCD") then return end
+        local dashAnim = CombatConfig.Animations.dashForward
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            dashAnim = CombatConfig.Animations.dashBack
+        elseif UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            dashAnim = CombatConfig.Animations.dashLeft
+        elseif UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            dashAnim = CombatConfig.Animations.dashRight 
+            elseif UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            dashAnim = CombatConfig.Animations.dashForward
+            end
+        DashEvent:FireServer()
+        StateHandler.SetState(player, "Dashing", true, CombatConfig.DashDuration)
+        StateHandler.SetState(player, "DashCD", true, CombatConfig.DashCD)
+        animmodule.LoadAnim(Character, "Dash", dashAnim)
+    end
+
     if input.KeyCode == Enum.KeyCode.M then
         statactionEvent:FireServer(nil, 10, "AddPoints")
     end
@@ -77,7 +106,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.Q then
         if ClientState.getEquippedSlot() then return end
         if StateHandler.GetState(player, "Attacking") or StateHandler.GetState(player, "FireballCD") or StateHandler.GetState(player, "Blocking") or StateHandler.GetState(player, "Stunned") then return end
-        StateHandler.SetState(player, "Attacking", true)
+                StateHandler.SetState(player, "Attacking", true)
         animmodule.LoadAnim(Character, "Fireball", CombatConfig.Animations.Fireball)
         task.wait(0.61)
         FireballEvent:FireServer()
