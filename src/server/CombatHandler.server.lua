@@ -86,7 +86,7 @@ PunchEvent.OnServerEvent:Connect(function(player)
             animmodule.LoadAnim(targetCharacter, "Hit", animToPlay)
             hitAnimIndex = hitAnimIndex % 2 + 1
 
-            if (time() - (comboTime[player] or 0)) > 2 then
+            --[[if (time() - (comboTime[player] or 0)) > 2 then
                 hitCounter[player] = 0
             end
             hitCounter[player] = (hitCounter[player] or 0) + 1
@@ -96,6 +96,7 @@ PunchEvent.OnServerEvent:Connect(function(player)
                 hitCounter[player] = 0
                 comboTime[player] = 0
             end
+            ]]
         end
     end
 end)
