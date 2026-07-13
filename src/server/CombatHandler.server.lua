@@ -13,6 +13,7 @@ local SpecialMoveHandler = require(ReplicatedStorage:WaitForChild("Shared"):Wait
 local InventoryModule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("InventoryModule"))
 local animmodule = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("AnimationHandler"))
 local HitboxHandler = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("HitboxHandler"))
+local Hitvfx = game:GetService("ServerStorage"):WaitForChild("Hitvfx")
 
 local hitAnimIndex = 1
 local hitAnims = {CombatConfig.Animations.HitAnim1, CombatConfig.Animations.HitAnim2}
@@ -52,10 +53,28 @@ PunchEvent.OnServerEvent:Connect(function(player)
                 -- Player-vs-player damage uses blocking rules.
                 DamageModule.dealregularDamageplayer(player, targetCharacter)
                 StateHandler.SetStun(targetPlayer, true, CombatConfig.PunchStun)
+                local targetPlayerPosition = targetPlayer.Character.HumanoidRootPart.Position
+                local vfx = Hitvfx:Clone()
+                vfx.Position = targetPlayerPosition
+                vfx.Parent = targetPlayer.Character
+                local weld = Instance.new("WeldConstraint")
+                weld.Parent = vfx
+                weld.Part0 = vfx
+                weld.Part1 = targetPlayer.Character.HumanoidRootPart
+                game:GetService("Debris"):AddItem(vfx, 0.5)
             else
                 -- NPC damage uses the simpler damage path.
                 DamageModule.dealregularDamagenpc(player, targetCharacter)
                 StateHandler.SetStun(targetCharacter, true, CombatConfig.PunchStun)
+                local targetCharacterPosition = targetCharacter.HumanoidRootPart.Position
+                local vfx = Hitvfx:Clone()
+                vfx.Position = targetCharacterPosition
+                vfx.Parent = targetCharacter
+                local weld = Instance.new("WeldConstraint")
+                weld.Parent = vfx
+                weld.Part0 = vfx
+                weld.Part1 = targetCharacter.HumanoidRootPart
+                game:GetService("Debris"):AddItem(vfx, 0.5)
             end
             -- shared hit counter and animation logic
             local animToPlay = hitAnims[hitAnimIndex]
