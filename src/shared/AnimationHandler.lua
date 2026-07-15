@@ -28,9 +28,20 @@ function AnimationHandler.LoadAnim(char, _type, animId, loop)
     animation.AnimationId = animId
     local track = animator:LoadAnimation(animation)
     track.Looped = loop or false 
-    if _type == "Idle" then
-        track.Priority = Enum.AnimationPriority.Idle
+       if _type == "Idle" then
+        -- Above Enum.AnimationPriority.Idle on purpose: Roblox's built-in
+        -- Animate script auto-plays its own "holding a tool" idle animation
+        -- (ToolNoneAnim) at the Idle tier whenever any Tool is equipped, and
+        -- it was blending with/masking this one since they tied in priority.
+        track.Priority = Enum.AnimationPriority.Movement
+    elseif _type == "Sprint" then
+        track.Priority = Enum.AnimationPriority.Action
+    elseif _type == "Dash" then 
+        track.Priority = Enum.AnimationPriority.Action4
+    elseif _type == "Walk" then
+        track.Priority = Enum.AnimationPriority.Movement
     end
+
     AnimationHandler.Anims[char] = AnimationHandler.Anims[char] or {}
     AnimationHandler.Anims[char][_type] = AnimationHandler.Anims[char][_type] or {}
 

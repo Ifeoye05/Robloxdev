@@ -29,6 +29,7 @@ local FireballEvent = ReplicatedStorage:WaitForChild("FireballEvent")
 PunchEvent.OnServerEvent:Connect(function(player)
     -- Prevent spam attacks while the player is already in an attack state.
     if StateHandler.GetState(player, "Attacking") then return end
+    StateHandler.SetState(player, "Attacking", true, CombatConfig.PunchCD)
     local isKatana = InventoryModule.getEquipped(player) ~= nil
 
     local Character = player.Character

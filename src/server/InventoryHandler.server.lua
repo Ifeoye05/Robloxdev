@@ -46,10 +46,12 @@ EquipEvent.OnServerEvent:Connect(function(player, slot)
     else return end
 end)
 
-game.Players.PlayerAdded:Connect(function(player)
+local function onPlayerAdded(player)
     -- Give each new player a starter weapon and send the initial inventory state to their UI.
     local katanatool = katana:Clone()
-    player.CharacterAdded:Wait()
+    if not player.Character then
+        player.CharacterAdded:Wait()
+    end
     InventoryModule.addItem(player, katanatool, 1)
     local inventoryData = InventoryModule.GetInventory(player)
     local inventorydataTXT = {}
@@ -59,7 +61,15 @@ game.Players.PlayerAdded:Connect(function(player)
         end
     end
     InventoryUpdate:FireClient(player, inventorydataTXT)
-end)
+end
+
+-- Players who joined before this script finished connecting (e.g. in Studio
+-- Play Solo, where the test player is often already present) would otherwise
+-- never receive PlayerAdded and would be stuck with an empty inventory.
+for _, player in ipairs(game.Players:GetPlayers()) do
+    task.spawn(onPlayerAdded, player)
+end
+game.Players.PlayerAdded:Connect(onPlayerAdded)
 
 game.Players.PlayerRemoving:Connect(function(player)
     if equippedWeapons[player] then

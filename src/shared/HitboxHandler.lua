@@ -51,11 +51,16 @@ function Hitbox.visualize(character, _type, options)
         local visualPart = Instance.new("Part")
         visualPart.Size = options.size
         visualPart.CFrame = options.cframe
-        visualPart.Anchored = true
+        visualPart.Anchored = false
         visualPart.CanCollide = false
         visualPart.Transparency = 0.5
+        visualPart.Massless = true
         visualPart.Color = Color3.fromRGB(255, 0, 0)
-        visualPart.Parent = workspace
+        visualPart.Parent = character
+        local weld = Instance.new("WeldConstraint")
+        weld.Parent = visualPart
+        weld.Part0 = visualPart
+        weld.Part1 = character.HumanoidRootPart
         game:GetService("Debris"):AddItem(visualPart, 0.1)
     elseif _type == "sphere" then
         local radius = options.radius
